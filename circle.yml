@@ -1,0 +1,13 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  override:
+    - docker info
+
+test:
+  override:
+    - docker build -t cowhub/cowhub-documentation .
+    - docker run -itd -v $PWD:/documentation cowhub/cowhub-documentation
+    - cp -r report.pdf $CIRCLE_ARTIFACTS/
