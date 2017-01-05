@@ -1,13 +1,11 @@
-machine:
-  services:
-    - docker
-
 dependencies:
   override:
-    - docker info
+    - apt-get update
+    - apt-get install -y texlive texlive-latex-extra \
+      texlive-xetex pandoc lmodern
 
 test:
   override:
-    - docker build -t cowhub/cowhub-documentation .
-    - docker run -itd -v $PWD:/documentation cowhub/cowhub-documentation
+    - pandoc --variable=geometry:a4paper --highlight-style pygments --mathjax \
+             --latex-engine=xelatex report.tex -o report.pdf
     - cp -r report.pdf $CIRCLE_ARTIFACTS/
