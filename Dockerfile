@@ -21,3 +21,4 @@ RUN rm -rf Python-*
 
 # Create documentation
 WORKDIR /documentation
+CMD ["pandoc", "--variable=geometry:a4paper", "--highlight-style pygments", "--mathjax", "--latex-engine=xelatex", "report.tex", "-o", "report.pdf"]
