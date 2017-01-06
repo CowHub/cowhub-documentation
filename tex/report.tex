@@ -2,7 +2,7 @@
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
-\documentclass[geometry:a4paper]{article}
+\documentclass[twoside, a4paper, titlepage]{article}
 
 \usepackage{fancyhdr} % Required for custom headers
 \usepackage{lastpage} % Required to determine the last page for the footer
@@ -36,15 +36,17 @@
 %----------------------------------------------------------------------------------------
 
 \title{
-\vspace{2in}
-\textmd{\textbf{Imperial College 3rd Year Group Project}}\\
-\textmd{\textbf{Tracing and identifying cattle}}\\
-\vspace{3in}
+  \vspace{2in}
+  \textmd{\textbf{
+    Imperial College 3rd Year Group Project \\
+    Tracing and Identifying Cattle
+  }}
+  \vspace{3in}
 }
 
 \author{
-	\textbf{Frederick Lindsey, Thomas Szyszko} \\
-	\textbf{Karim Nahas, Hongjiang Liu, Gregoire Yharrassarry}
+	Frederick Lindsey, Thomas Szyszko \\
+	Karim Nahas, Hongjiang Liu, Gregoire Yharrassarry
 }
 \date{9th January 2017}
 
@@ -58,38 +60,63 @@
 %	TABLE OF CONTENTS
 %----------------------------------------------------------------------------------------
 
-\newpage
 \tableofcontents
-\newpage
 
 %----------------------------------------------------------------------------------------
 
-\include{executive_summary.tex}
+
+\begin{section}{Executive Summary}
+\include{executive_summary}
+\end{section}
 % - Elevator pitch
 % - What is the project? What does it do? What would I want to use/buy it?
 % - No implementation, software engineering details, or project management
 
-\include{introduction.tex}
+
+\begin{section}{Introduction}
+\include{introduction}
+\end{section}
 % - Set the scene ('motivation')
 % - State the problem you're trying to solve ('objectives')
 % - Summarise main achievements
 
-\include{project_management.tex}
+
+\begin{section}{Project Management}
+\include{project_management}
+\end{section}
 % - Planning
 % - Group organisation
 % - Breakdown and task allocation
 
-\include{design_and_implementation.tex}
+
+\begin{section}{Design and Implementation}
+\include{design_and_implementation}
+\end{section}
 % - Detail of design
 % - Summarise key implementation details
 % 	- How did you do it?
 % 	- What technology was used and why?
 
-\include{evaluation.tex}
-\include{conclusion.tex}
-\include{future_extensions.tex}
-\include{_bibliography.tex}
-\include{_appendix.tex}
+
+\begin{section}{Evaluation}
+\include{evaluation}
+\end{section}
+
+\begin{section}{Conclusion}
+\include{conclusion}
+\end{section}
+
+\begin{section}{Future Extensions}
+\include{future_extensions}
+\end{section}
+
+\begin{section}{Bibliography}
+\include{_bibliography}
+\end{section}
+
+\begin{section}{Appendix}
+\include{_appendix}
+\end{section}
 
 %----------------------------------------------------------------------------------------
 
