@@ -7,6 +7,6 @@ dependencies:
 test:
   override:
     - |
-      pandoc --variable=geometry:a4paper --highlight-style pygments --mathjax
+      pandoc --variable=geometry:a4paper --highlight-style pygments --mathjax \
              --latex-engine=xelatex report.tex -o report.pdf
     - cp -r report.pdf $CIRCLE_ARTIFACTS/
