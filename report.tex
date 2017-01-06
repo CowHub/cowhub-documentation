@@ -10,7 +10,7 @@
 %
 % Note:
 % The \lipsum[#] commands throughout this template generate dummy text
-% to fill the template out. These commands should all be removed when 
+% to fill the template out. These commands should all be removed when
 % writing assignment content.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -33,14 +33,13 @@
 \oddsidemargin=0in
 \textwidth=6.5in
 \textheight=9.0in
-\headsep=0.25in 
+\headsep=0.25in
 
 \linespread{1.1} % Line spacing
 
 % Set up the header and footer
 \pagestyle{fancy}
-\lhead{\hmwkAuthorName} % Top left header
-\chead{\hmwkClass\ (\hmwkClassInstructor\ \hmwkClassTime): \hmwkTitle} % Top center header
+\lhead{\docAuthorName} % Top left header
 \rhead{\firstxmark} % Top right header
 \lfoot{\lastxmark} % Bottom left footer
 \cfoot{} % Bottom center footer
@@ -68,39 +67,39 @@
 }
 
 \setcounter{secnumdepth}{0} % Removes default section numbers
-\newcounter{homeworkProblemCounter} % Creates a counter to keep track of the number of problems
+\newcounter{docProblemCounter} % Creates a counter to keep track of the number of problems
 
-\newcommand{\homeworkProblemName}{}
-\newenvironment{homeworkProblem}[1][Problem \arabic{homeworkProblemCounter}]{ % Makes a new environment called homeworkProblem which takes 1 argument (custom name) but the default is "Problem #"
-\stepcounter{homeworkProblemCounter} % Increase counter for number of problems
-\renewcommand{\homeworkProblemName}{#1} % Assign \homeworkProblemName the name of the problem
-\section{\homeworkProblemName} % Make a section in the document with the custom problem count
-\enterProblemHeader{\homeworkProblemName} % Header and footer within the environment
+\newcommand{\docProblemName}{}
+\newenvironment{docProblem}[1][Problem \arabic{docProblemCounter}]{ % Makes a new environment called docProblem which takes 1 argument (custom name) but the default is "Problem #"
+\stepcounter{docProblemCounter} % Increase counter for number of problems
+\renewcommand{\docProblemName}{#1} % Assign \docProblemName the name of the problem
+\section{\docProblemName} % Make a section in the document with the custom problem count
+\enterProblemHeader{\docProblemName} % Header and footer within the environment
 }{
-\exitProblemHeader{\homeworkProblemName} % Header and footer after the environment
+\exitProblemHeader{\docProblemName} % Header and footer after the environment
 }
 
 \newcommand{\problemAnswer}[1]{ % Defines the problem answer command with the content as the only argument
 \noindent\framebox[\columnwidth][c]{\begin{minipage}{0.98\columnwidth}#1\end{minipage}} % Makes the box around the problem answer and puts the content inside
 }
 
-\newcommand{\homeworkSectionName}{}
-\newenvironment{homeworkSection}[1]{ % New environment for sections within homework problems, takes 1 argument - the name of the section
-\renewcommand{\homeworkSectionName}{#1} % Assign \homeworkSectionName to the name of the section from the environment argument
-\subsection{\homeworkSectionName} % Make a subsection with the custom name of the subsection
-\enterProblemHeader{\homeworkProblemName\ [\homeworkSectionName]} % Header and footer within the environment
+\newcommand{\docSectionName}{}
+\newenvironment{docSection}[1]{ % New environment for sections within doc problems, takes 1 argument - the name of the section
+\renewcommand{\docSectionName}{#1} % Assign \docSectionName to the name of the section from the environment argument
+\subsection{\docSectionName} % Make a subsection with the custom name of the subsection
+\enterProblemHeader{\docProblemName\ [\docSectionName]} % Header and footer within the environment
 }{
-\enterProblemHeader{\homeworkProblemName} % Header and footer after the environment
+\enterProblemHeader{\docProblemName} % Header and footer after the environment
 }
-   
+
 %----------------------------------------------------------------------------------------
 %	NAME AND CLASS SECTION
 %----------------------------------------------------------------------------------------
 
-\newcommand{\hmwkTitle}{Tracing and identifying cattle} % Assignment title
-\newcommand{\hmwkDate}{Monday, January 9th 2017} % Due date
-\newcommand{\hmwkAuthorNameFirst}{Frederick Lindsey, Thomas Szyszko}
-\newcommand{\hmwkAuthorNameSecond}{Karim Nahas, Hongjiang Liu, Gregoire Yharrassarry}
+\newcommand{\docTitle}{Tracing and identifying cattle} % Assignment title
+\newcommand{\docDate}{Monday, January 9th 2017} % Due date
+\newcommand{\docAuthorNameFirst}{Frederick Lindsey, Thomas Szyszko}
+\newcommand{\docAuthorNameSecond}{Karim Nahas, Hongjiang Liu, Gregoire Yharrassarry}
 
 %----------------------------------------------------------------------------------------
 %	TITLE PAGE
@@ -109,14 +108,14 @@
 \title{
 \vspace{2in}
 \textmd{\textbf{\hmwkClass}}\\
-\textmd{\textbf{\hmwkTitle}}\\
-\textmd{{\hmwkDate}}\\
+\textmd{\textbf{\docTitle}}\\
+\textmd{{\docDate}}\\
 \vspace{3in}
 }
 
 \author{
-	\textbf{\hmwkAuthorNameFirst} \\
-	\textbf{\hmwkAuthorNameSecond}
+	\textbf{\docAuthorNameFirst} \\
+	\textbf{\docAuthorNameSecond}
 }
 \date{} % Insert date here if you want it to appear below your name
 
@@ -142,80 +141,80 @@
 
 % To have just one problem per page, simply put a \clearpage after each problem
 
-\begin{homeworkProblem}
+\begin{docProblem}
 \lipsum[1]\vspace{10pt} % Question
 
 \problemAnswer{ % Answer
 \lipsum[2]
 }
-\end{homeworkProblem}
+\end{docProblem}
 
 %----------------------------------------------------------------------------------------
 %	PROBLEM 2
 %----------------------------------------------------------------------------------------
 
-\begin{homeworkProblem}[Exercise \#\arabic{homeworkProblemCounter}] % Custom section title
+\begin{docProblem}[Exercise \#\arabic{docProblemCounter}] % Custom section title
 \lipsum[3] % Question
 
 %--------------------------------------------
 
-\begin{homeworkSection}{(a)} % Section within problem
+\begin{docSection}{(a)} % Section within problem
 \lipsum[4]\vspace{10pt} % Question
 
 \problemAnswer{ % Answer
 \lipsum[5]
 }
-\end{homeworkSection}
+\end{docSection}
 
 %--------------------------------------------
 
-\begin{homeworkSection}{(b)} % Section within problem
+\begin{docSection}{(b)} % Section within problem
 \problemAnswer{ % Answer
 \lipsum[6]
 }
-\end{homeworkSection}
+\end{docSection}
 
 %--------------------------------------------
 
-\end{homeworkProblem}
+\end{docProblem}
 
 %----------------------------------------------------------------------------------------
 %	PROBLEM 3
 %----------------------------------------------------------------------------------------
 
-\begin{homeworkProblem}[Prob. \Roman{homeworkProblemCounter}] % Roman numerals
+\begin{docProblem}[Prob. \Roman{docProblemCounter}] % Roman numerals
 
 %--------------------------------------------
 
-\begin{homeworkSection}{\homeworkProblemName:~(a)} % Using the problem name elsewhere
+\begin{docSection}{\docProblemName:~(a)} % Using the problem name elsewhere
 \problemAnswer{ % Answer
 \lipsum[7]
 }
-\end{homeworkSection}
+\end{docSection}
 
 %--------------------------------------------
 
-\begin{homeworkSection}{\homeworkProblemName:~(b)}
+\begin{docSection}{\docProblemName:~(b)}
 \lipsum[8]\vspace{10pt} % Question
 
 \problemAnswer{ % Answer
 \lipsum[9]
 }
-\end{homeworkSection}
+\end{docSection}
 
 %--------------------------------------------
 
-\end{homeworkProblem}
+\end{docProblem}
 
 %----------------------------------------------------------------------------------------
 %	PROBLEM 4
 %----------------------------------------------------------------------------------------
 
-\begin{homeworkProblem}[Prob. \Roman{homeworkProblemCounter}] % Roman numerals
+\begin{docProblem}[Prob. \Roman{docProblemCounter}] % Roman numerals
 \problemAnswer{ % Answer
 \lipsum[10]
 }
-\end{homeworkProblem}
+\end{docProblem}
 
 %----------------------------------------------------------------------------------------
 
