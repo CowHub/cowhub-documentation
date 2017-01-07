@@ -1,25 +1,14 @@
-machine:
-  environment:
-    FILENAME: report
-
 dependencies:
-  cache_directories:
-    - "~/.apt-cache"
-  pre:
-    - |
-      sudo rm -rf /var/cache/apt/archives && \
-      sudo ln -s ~/.apt-cache /var/cache/apt/archives && \
-      mkdir -p ~/.apt-cache/partial
   override:
     - sudo apt-get update
     - |
       sudo apt-get install -y \
-        texlive \
+        make texlive \
         texlive-latex-base texlive-latex-extra \
         texlive-fonts-recommended texlive-fonts-extra
 
 test:
   override:
     - |
-      pdflatex -file-line-error -interaction=nonstopmode -synctex=1 "$FILENAME.tex"
+      make report
       cp -r "$FILENAME.pdf" $CIRCLE_ARTIFACTS/
