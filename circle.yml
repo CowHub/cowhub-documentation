@@ -11,4 +11,4 @@ test:
   override:
     - |
       make report
-      cp -r "$FILENAME.pdf" $CIRCLE_ARTIFACTS/
+      cp -r report.pdf $CIRCLE_ARTIFACTS/
