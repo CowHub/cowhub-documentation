@@ -17,6 +17,6 @@ dependencies:
 test:
   override:
     - |
-      pandoc --variable=geometry:a4paper --highlight-style pygments --mathjax \
-             --latex-engine=xelatex "$FILENAME.tex" -o "$FILENAME.pdf"
+      pandoc --highlight-style pygments --mathjax \
+             --latex-engine=pdflatex "$FILENAME.tex" -o "$FILENAME.pdf"
       cp -r "$FILENAME.pdf" $CIRCLE_ARTIFACTS/
