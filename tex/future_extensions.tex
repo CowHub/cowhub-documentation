@@ -1,1 +1,24 @@
-TODO
+
+\subsection{Machine Learning}
+
+Up till this point, only a very standard edge matching method is used and the process is purely mathematical. This exports some rather serious problems:
+
+\begin{itemize}
+	\item some useful characteristics are always being ignored (eye colour and muzzle shape, for instance) without proper handling. We understand that as human, those characteristics can be easily commissioned to assist our recognition process without us realising about it but mathematically those features are proven to be difficult to deal with;
+	\item we have assumed that the images uploaded are usable - that is, the majority of the image displays the muzzle of a cattle rather clearly; but in reality this is generally not the case: the muzzle might be wet, making the edge extraction impossible; or the blurs caused by camera movement. A pure mathematical function, in essence, cannot deal with imperfect input that is beyond its input domain.\footnote{However we do have, to some extent, normalisation and correctional processes that de-skew and rotate the image.}
+\end{itemize}
+
+In the modern world those problem (or at least part of it) can be tackled using Machine Learning techniques. For example, we can use machine learning to identify a cattle from an image - just as we can using facial recognition on image of humans; or to outline an area of interest, aka filtering out the parts that are not of any importance (i.e. the background).
+
+So far the only thing preventing us from using ML is the size of our training data. For this project, unfortunately, we have almost none usable training data (only a few images were provided, none of which is of any use as there is not even any ID associated with those images).
+
+We have been actively collecting the user uploaded data (with their consent) and the result and feedback of a match so that the neural network can be properly trained to a usable state.
+
+\subsection{Integration with the Government Database}
+
+As of now we require the farmer to upload the information of a cattle manually. This is a mundane and repetitive process and requires a lot of patience. To speed up the process and make it less error-prone, we want to integrate the system with the existing government database to allow the users to pull the data straight from the database without any manual input, provided that the users identity is verified and he/she has the permission to pull the requested cattle data.
+
+Furthermore we could allow users to push the (updated) information back into the government database for two-way synchronisation.
+
+This process is not implementation intensive and can be done rather quickly. The only hinderance is the government approval and support.
+
