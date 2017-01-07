@@ -1,4 +1,4 @@
-CowHub, as opposed to being monolithic, has a number of micro, modular components that serve different purposes and form a complete system in whole. Each and every component is capable of running on its own, and being built and tested independently, and corresponds to a source repository on GitHub. For an overview of all important components, see Figure \ref{fig:structure}.
+CowHub, as opposed to being monolithic, has a number of small, modular components that serve different purposes and form a complete system. Each and every component is capable of running on its own, being built and tested independently and corresponds to a source repository on GitHub. For an overview of all important components, see Figure \ref{fig:structure}.
 
 \begin{sidewaysfigure}
   \includegraphics[width=\textwidth]{../sketch/structure.pdf}
@@ -6,11 +6,11 @@ CowHub, as opposed to being monolithic, has a number of micro, modular component
   \label{fig:structure}
 \end{sidewaysfigure}
 
-CowHub employs Amazon Web Services (AWS) for a scalable, robust and stable cloud solution. For this project, the services that are used include EC2, S3, RDS, Lambda and ElastiCache. The use of each service will be explained further in the following report.
+CowHub employs Amazon Web Services (AWS) for a scalable, robust and stable cloud solution. For this project, the used services include IAM, CloudFront, Route 53, EC2, S3, RDS, Lambda, ElastiCache and API Gateway\footnote{This will later be referred to as Amazon API Gateway for disambiguation.}. The use of each service will be explained further in the following report.
 
 The report proceeds with respect to the components of the project.
 
-\subsection{Database Unit}
+\subsection{Persistent Data Storage}
 The database unit is built on top of Amazon Relational Database Service (RDS) and Amazon Simple Storage Service (S3), and PostgreSQL has been chosen to be the engine of the database service. The database unit aims to provide a simple, scalable and cloud-based database interface for our other services to use. 
 
 RDS has been chosen because it is an easy solution to a resizable and scalable database, and provides features such as duplication. By employing RDS we could focus more on the application that we are building and pay little to no attention to the time-consuming database administrative tasks.
@@ -25,6 +25,7 @@ The database is to store the following:
 	\item The login details of registered farmers. Farmers will need to log in to be able to input and review the cattle data.
 	\item The match results. Every match job will be assigned a job ID and the result will be stored into the database. These match results will be useful in the future as statistics.
 	\item Other data for the system to run smoothly (including session tokens etc.). 
+	% TODO: more stuff about databases
 \end{enumerate}
 
 The database unit is only accessible through the API Gateway\footnote{Images are encoded in Base64 format before transfer (as a string).}.
@@ -36,7 +37,7 @@ The API has two most important subcomponents:
 
 \begin{enumerate}
 	\item A REST API for communication with the front-ends.
-	\item A Job Manager for communication with the processing unit.
+	\item A Job Manager for communication with the headless computational unit.
 \end{enumerate}
 
 The REST API mainly handles the following:
@@ -45,6 +46,7 @@ The REST API mainly handles the following:
 	\item Account management. A user (farmer) needs to be able to manage his/her personal data, change passwords and etc.
 	\item Cattle management. A user (farmer) needs to be able to create/edit/delete information about a cattle and upload/update/delete images for a cattle. 
 	\item Session management. The API handles sessions through tokens in a unified manner for all front-ends that require user login as REST API is stateless.
+	% TODO: more stuff about our API
 \end{enumerate}
 
 We have a standardised URL schema for the API that allows us to develop the component more efficiently.
@@ -57,26 +59,44 @@ The Job manager is the more interesting part. There are two different types of j
 	\begin{enumerate}
 		\item Generate the descriptor for the image to be matched.
 		\item Divide the database of images into chunks with size $N$\footnote{A predefined value. For the proof of concept we have chosen 25.}, label each chunk with an ID $\text{id}_i$.
-		\item For each $\text{id}_i$, forward the ID, the job ID and the image descriptor to the processing unit and wait for a best match within the chunk to be handed back. The processing unit is running asynchronously for each call.
+		\item For each chunk with ID $\text{id}_i$, forward the ID, the job ID and the image descriptor to the headless computational unit and wait for a best match within the chunk to be handed back. The headless computational unit will run asynchronously for all calls.
 		\item Aggregate the result for a best match. Write the best match into the database and return it to the caller.
 	\end{enumerate}
 \end{enumerate}
 
+Based on our statistics, step (a) normally takes a half to one second, and every pairwise match in step (c) takes about 30 to 80 milliseconds\footnote{This is due to the resizing and normalisation done prior to the match.}. That is, ignoring the network and IO delays, a match will take about $T = N * t_m / 1000 + t_d / 1000$ seconds to complete, where $t_m \in [30, 80]$ and $t_d \in [500, 1000]$. In this reasoning our computation time can be thought of as upper bounded by $Nc$, where $c \in \mathbb{Q}$, which is totally size-agnostic, because it is based on the assumption that we would always have $\lceil M / N \rceil$ computational units at our disposal. This rational implies that, in theory, the computation time does not generally grow with respect to the number of images in our database\footnote{In practice it does - because we cannot ignore the time consumed for IO actions.}.
+
 \subsection{Key Value Store}
 A cluster of Redis servers is employed through Amazon ElastiCache service. 
 
-For performance reasons it has been decided that we use a key value store for concurrent and lively access for the descriptor of an image. This store is to be accessed very frequently and as only a small piece of data is being extracted at once it seemed inappropriate to be using a database. Another reason that a key value store is used, as opposed to accessing the descriptor directly from the database unit is data separation - the only place that this data is being accessed is the processing unit and nothing more. Also, as suggested before, the database unit is only accessible through the API, and any access directly from other components would break the promise; alternatively, to access the descriptors through the API would introduce significant (and unnecessary) burden to the API itself and result in great performance problems.
+For performance reasons it has been decided that we use a key value store for concurrent and lively access for the descriptor of an image. This store is to be accessed very frequently and as only a small piece of data is being extracted at once it seemed inappropriate to be using a database. Another reason that a key value store is used, as opposed to accessing the descriptor directly from the database unit is data separation - the only place that this data is being accessed is the headless computational unit and nothing more. Also, as suggested before, the database unit is only accessible through the API, and any access directly from other components would break the promise; alternatively, to access the descriptors through the API would introduce significant (and unnecessary) burden to the API itself and result in great performance problems.
 
-\subsection{Processing Unit}
-The processing is built on top of AWS Lambda services. The processing unit supports two different kinds of jobs: registration and matching, as suggested before. A call to the processing unit will cause a Lambda calculation unit (Lambda) to be spawned. Lambda processes are running concurrently, and they are not necessarily on the same machine\footnote{It can be thought of as Actors - universal primitives for concurrent computation. Similar constructs implementation include \textit{Akka} for Scala.}.
+\subsection{Headless Computational Unit}
+The processing is built on top of AWS Lambda services. The headless computational unit supports two different kinds of jobs: registration and matching, as suggested before. A call to the headless computational unit will cause a Lambda calculation unit (Lambda) to be spawned. Lambda processes are running concurrently, and they are not necessarily on the same machine\footnote{It can be thought of as Actors - universal primitives for concurrent computation. Similar constructs implementation include \textit{Akka} for Scala.}.
 
 The two different kinds of the Lambda processes include:
 
 \begin{enumerate}
-	\item Registration Lambda. This is a one way communication. The caller (the API) calls the processing unit, causing a Registration Lambda to be spawned. This Lambda process will run to the end (the generation of the descriptor of an image) and then store it into the Key Value store.
-	\item Matching Lambda. The caller will need to call the processing unit with the job detail, and the Matching Lambda will run the match for $N$ images as discussed before. This process is running concurrently. Upon finishing the process, the Lambda will forward the best match within a batch of $N$ images back to the caller as notification.
+	\item Registration Lambda. This is a one way communication. The caller (the API) calls the headless computational unit, causing a Registration Lambda to be spawned. This Lambda process will run to the end (the generation of the descriptor of an image) and then store it into the Key Value store.
+	\item Matching Lambda. The caller will need to call the headless computational unit with the job detail, and the Matching Lambda will run the match for $N$ images as discussed before. This process is running concurrently. Upon finishing the process, the Lambda will forward the best match within a batch of $N$ images back to the caller as notification.
 \end{enumerate}
 
-The process of matching is similar to the process of a Map Reduce, and so is the implementation. The only difference, through the use of AWS Lambda, is that we do not provision and administer the servers ourselves - the computing units are spawned ad hoc and only whenever needed.
+The process of matching is similar to that of Map Reduce, and so is the implementation. The only difference, through the use of AWS Lambda, is that we do not provision or administer the servers ourselves - the computational units are spawned ad hoc and only whenever needed.
 
 \subsection{Mobile and Web Front-ends}
+Our mobile application supports Android and iOS platforms. There is no plan on supporting Windows Phone in the foreseeable future.
+
+To assist the development process in a rather short period of time, we have decided to use a cross-platform solution to build our app on. More specifically, we have employed Apache Cordova framework as the foundation block of our app, and most of the application level programming is done in JavaScript. This implies that our apps have the so-called ``hybrid'' structure where
+
+\begin{itemize}
+	\item the interface prototyping is done in a unified manner, in JavaScript and styling in CSS - meaning that it will produce the same layout across different platforms because the interface is shown through a WebView\footnote{An important assumption made here is that the WebView will behave uniformly for the subset of layout techniques that we have used. Thanks to the use of WebKit rendering engine on both platforms and the standardised protocols and guidelines for the Web this assumption can be, to a degree, thought as true.};
+	\item most of the higher level logic is written in JavaScript, giving the same behaviour cross-platform, meaning that we can start the development without any prior platform-specific knowledge;
+	\item agile development of the application is allowed as there is little to none compilation required for the application to be built;
+	\item most of the Node.js libraries are made available for use: React.js and Redux, for example;
+\end{itemize}
+
+The use of the the ``hybrid'' structure also yields certain disadvantages compared to developing the application natively. For example, the performance will, to some extent, suffer from the extensive use of WebView, and so will the battery life; access to low-level and platform dependent features are limited, and requires more fiddling\footnote{Normally through the native interface of the framework.} for it to work. But clearly for the amount of time given, and the state of the framework those disadvantages are out-weighted by the advantages listed above.
+
+The Web front-end is coded using React.js and Redux, and there is no server side rendering required. For our Web front-end to work there only needs to be a server serving static files, thus making our Web front-end highly performant and scalable.
+
+The front-ends are all stateless.
