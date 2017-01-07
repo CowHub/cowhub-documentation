@@ -12,7 +12,10 @@ dependencies:
       mkdir -p ~/.apt-cache/partial
   override:
     - sudo apt-get update
-    - sudo apt-get install -y texlive texlive-xetex texlive-latex-extra pandoc lmodern
+    - |
+      sudo apt-get install -y \
+        texlive-latex-base texlive-latex-extra \
+        texlive-fonts-recommended texlive-fonts-extra 
 
 test:
   override:
