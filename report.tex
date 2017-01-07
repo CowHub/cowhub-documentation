@@ -1,6 +1,6 @@
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 
 \documentclass[twoside, a4paper, titlepage]{article}
 
@@ -8,6 +8,9 @@
 \usepackage{lastpage} % Required to determine the last page for the footer
 \usepackage{extramarks} % Required for headers and footers
 \usepackage{graphicx} % Required to insert images
+
+\usepackage[backend=biber,style=authoryear]{biblatex} % For bibliography
+\addbibresource{sources.bib}
 
 % Margins
 \topmargin=-0.45in
@@ -18,6 +21,10 @@
 \headsep=0.25in
 
 \linespread{1.1} % Line spacing
+
+% Images
+\setlength\fboxsep{0pt}
+\setlength\fboxrule{0.5pt}
 
 % Set up the header and footer
 \pagestyle{fancy}
@@ -31,9 +38,9 @@
 
 \setlength\parindent{0pt} % Removes all indentation from paragraphs
 
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 %	TITLE PAGE
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 
 \title{
   \vspace{2in}
@@ -50,23 +57,23 @@
 }
 \date{9th January 2017}
 
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 
 \begin{document}
 
 \maketitle
 
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 %	TABLE OF CONTENTS
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 
 \tableofcontents
+\newpage
 
-%----------------------------------------------------------------------------------------
-
+%------------------------------------------------------------------------------
 
 \begin{section}{Executive Summary}
-\include{executive_summary}
+\include{tex/executive_summary}
 \end{section}
 % - Elevator pitch
 % - What is the project? What does it do? What would I want to use/buy it?
@@ -74,7 +81,7 @@
 
 
 \begin{section}{Introduction}
-\include{introduction}
+\include{tex/introduction}
 \end{section}
 % - Set the scene ('motivation')
 % - State the problem you're trying to solve ('objectives')
@@ -82,7 +89,7 @@
 
 
 \begin{section}{Project Management}
-\include{project_management}
+\include{tex/project_management}
 \end{section}
 % - Planning
 % - Group organisation
@@ -90,7 +97,7 @@
 
 
 \begin{section}{Design and Implementation}
-\include{design_and_implementation}
+\include{tex/design_and_implementation}
 \end{section}
 % - Detail of design
 % - Summarise key implementation details
@@ -99,25 +106,26 @@
 
 
 \begin{section}{Evaluation}
-\include{evaluation}
+\include{tex/evaluation}
 \end{section}
 
 \begin{section}{Conclusion}
-\include{conclusion}
+\include{tex/conclusion}
 \end{section}
 
 \begin{section}{Future Extensions}
-\include{future_extensions}
+\include{tex/future_extensions}
 \end{section}
 
 \begin{section}{Bibliography}
-\include{_bibliography}
+\printbibliography
+\newpage
 \end{section}
 
 \begin{section}{Appendix}
-\include{_appendix}
+\include{tex/_appendix}
 \end{section}
 
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 
 \end{document}
