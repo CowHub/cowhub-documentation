@@ -8,6 +8,9 @@
 \usepackage{lastpage} % Required to determine the last page for the footer
 \usepackage{extramarks} % Required for headers and footers
 \usepackage{graphicx} % Required to insert images
+\usepackage{rotating} % Required for sideways figure
+\usepackage{parskip} % Required for paragraph styling
+\usepackage{amsmath}
 
 % Margins
 \topmargin=-0.45in
@@ -17,7 +20,11 @@
 \textheight=9.0in
 \headsep=0.25in
 
-\linespread{1.1} % Line spacing
+% Sans Serif Font
+\renewcommand{\familydefault}{\sfdefault}
+
+% Line spacing
+\linespread{1.1}
 
 % Images
 \setlength\fboxsep{0pt}
@@ -33,6 +40,7 @@
 \renewcommand\headrulewidth{0.4pt} % Size of the header rule
 \renewcommand\footrulewidth{0.4pt} % Size of the footer rule
 
+\setlength\parskip{1.2em} % Space between paragraphs
 \setlength\parindent{0pt} % Removes all indentation from paragraphs
 
 %------------------------------------------------------------------------------
