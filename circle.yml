@@ -17,6 +17,5 @@ dependencies:
 test:
   override:
     - |
-      pandoc --highlight-style pygments --mathjax \
-             --latex-engine=pdflatex "$FILENAME.tex" -o "$FILENAME.pdf"
+      pdflatex -file-line-error -interaction=nonstopmode -synctex=1 "$FILENAME.tex"
       cp -r "$FILENAME.pdf" $CIRCLE_ARTIFACTS/
