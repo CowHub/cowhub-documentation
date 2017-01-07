@@ -86,7 +86,7 @@ The process of matching is similar to that of Map Reduce, and so is the implemen
 \subsection{Mobile and Web Front-ends}
 Our mobile application supports Android and iOS platforms. There is no plan on supporting Windows Phone in the foreseeable future.
 
-To assist the development process in a rather short period of time, we have decided to use a cross-platform solution to build our app on. More specifically, we have employed Apache Cordova framework as the foundation block of our app, and most of the application level programming is done in JavaScript. This implies that our apps have the so-called ``hybrid'' structure where
+To assist the development process in a rather short period of time, we have decided to use a cross-platform solution to build our app on. More specifically, we have employed Apache Cordova \cite{cordova} framework as the foundation block of our app, and most of the application level programming is done in JavaScript. This implies that our apps have the so-called ``hybrid'' structure where
 
 \begin{itemize}
 	\item the interface prototyping is done in a unified manner, in JavaScript and styling in CSS - meaning that it will produce the same layout across different platforms because the interface is shown through a WebView\footnote{An important assumption made here is that the WebView will behave uniformly for the subset of layout techniques that we have used. Thanks to the use of WebKit rendering engine on both platforms and the standardised protocols and guidelines for the Web this assumption can be, to a degree, thought as true.};
@@ -99,4 +99,4 @@ The use of the the ``hybrid'' structure also yields certain disadvantages compar
 
 The Web front-end is coded using React.js and Redux, and there is no server side rendering required. For our Web front-end to work there only needs to be a server serving static files, thus making our Web front-end highly performant and scalable.
 
-The front-ends are all stateless.
+The front-ends are all stateless, meaning that they will run independently. Another important implication is that users can develop their own front-end easily, should they feel that the provided front-ends are not for their taste.
