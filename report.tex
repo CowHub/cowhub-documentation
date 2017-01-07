@@ -1,6 +1,6 @@
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 
 \documentclass[twoside, a4paper, titlepage]{article}
 
@@ -8,6 +8,10 @@
 \usepackage{lastpage} % Required to determine the last page for the footer
 \usepackage{extramarks} % Required for headers and footers
 \usepackage{graphicx} % Required to insert images
+\usepackage{rotating} % Required for sideways figure
+\usepackage{parskip} % Required for paragraph styling
+\usepackage{amsmath}
+\usepackage{float} % For having figures inline
 
 % Margins
 \topmargin=-0.45in
@@ -17,7 +21,15 @@
 \textheight=9.0in
 \headsep=0.25in
 
-\linespread{1.1} % Line spacing
+% Sans Serif Font
+\renewcommand{\familydefault}{\sfdefault}
+
+% Line spacing
+\linespread{1.1}
+
+% Images
+\setlength\fboxsep{0pt}
+\setlength\fboxrule{0.5pt}
 
 % Set up the header and footer
 \pagestyle{fancy}
@@ -29,11 +41,12 @@
 \renewcommand\headrulewidth{0.4pt} % Size of the header rule
 \renewcommand\footrulewidth{0.4pt} % Size of the footer rule
 
+\setlength\parskip{1.2em} % Space between paragraphs
 \setlength\parindent{0pt} % Removes all indentation from paragraphs
 
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 %	TITLE PAGE
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 
 \title{
   \vspace{2in}
@@ -50,74 +63,78 @@
 }
 \date{9th January 2017}
 
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 
 \begin{document}
 
 \maketitle
 
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 %	TABLE OF CONTENTS
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 
 \tableofcontents
+\newpage
 
-%----------------------------------------------------------------------------------------
-
+%------------------------------------------------------------------------------
 
 \begin{section}{Executive Summary}
-\include{executive_summary}
+\input{tex/executive_summary}
 \end{section}
 % - Elevator pitch
 % - What is the project? What does it do? What would I want to use/buy it?
 % - No implementation, software engineering details, or project management
 
-
+\newpage
 \begin{section}{Introduction}
-\include{introduction}
+\input{tex/introduction}
 \end{section}
 % - Set the scene ('motivation')
 % - State the problem you're trying to solve ('objectives')
 % - Summarise main achievements
 
-
+\newpage
 \begin{section}{Project Management}
-\include{project_management}
+\input{tex/project_management}
 \end{section}
 % - Planning
 % - Group organisation
 % - Breakdown and task allocation
 
-
+\newpage
 \begin{section}{Design and Implementation}
-\include{design_and_implementation}
+\input{tex/design_and_implementation}
 \end{section}
 % - Detail of design
 % - Summarise key implementation details
 % 	- How did you do it?
 % 	- What technology was used and why?
 
-
+\newpage
 \begin{section}{Evaluation}
-\include{evaluation}
+\input{tex/evaluation}
 \end{section}
 
+\newpage
 \begin{section}{Conclusion}
-\include{conclusion}
+\input{tex/conclusion}
 \end{section}
 
+\newpage
 \begin{section}{Future Extensions}
-\include{future_extensions}
+\input{tex/future_extensions}
 \end{section}
 
+\newpage
 \begin{section}{Bibliography}
-\include{_bibliography}
+\input{tex/_bibliography}
 \end{section}
 
+\newpage
 \begin{section}{Appendix}
-\include{_appendix}
+\input{tex/_appendix}
 \end{section}
 
-%----------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
 
 \end{document}
