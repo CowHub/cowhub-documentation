@@ -89,6 +89,8 @@ The process of matching is similar to that of MapReduce, and so is the implement
 
 Our plan when designing the front-end was to support a number of platforms, ideally sharing the same codebase while still providing a native experience to the user. The requirement is to provide a mobile frontend allowing a user to photograph, geolocate and identify cattle, and an administrative web interface to manage user accounts and input further cattle information. 
 
+The front-ends we implement are all stateless, meaning that they will run independently. Another important implication of our system design where the front-ends all communicate through the same globally accessible APIs is that users can develop their own front-ends easily, should they feel that the provided front-ends are not for their taste.
+
 \subsubsection{Web Frontend}
 The Web front-end is implemented using React.js and Redux, which are JavaScript libraries used to build user interfaces. These libraries allow us, during development, to modify the WebView style and content and view the changes without the need to re-render a page. This allows to perform a number of action:
 
@@ -129,8 +131,6 @@ One of the largest challenges was implementing the camera view. While Cordova sh
 EzAR is a collection of packages amongst which there is a video overlay and a snapshot plugin. The video overlay activates the camera and displays the live camera feed behind the Webview. We are able to produce a custom camera view using react components, and use a modified Onsen to create transparent pages so the camera view can be seen. The snapshot plugin was originally designed to allow you to take screenshots of an application by grabbing an image from the camera and rendering the Webview on top of the image. By using a special debugging flag the plugin will return only the camera image. This means we can re-purpose the plugin as full custom camera. In the future native camera plugins can simply be slotted in in its place.
 
 
-
-The front-ends are all stateless, meaning that they will run independently. Another important implication is that users can develop their own front-end easily, should they feel that the provided front-ends are not for their taste.
 
 \subsection{Implementation Difficulties And Comments}
 
