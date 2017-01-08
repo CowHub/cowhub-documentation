@@ -90,7 +90,13 @@ The process of matching is similar to that of MapReduce, and so is the implement
 Our plan when designing the front-end was to support a number of platforms, ideally sharing the same codebase while still providing a native experience to the user. The requirement is to provide a mobile frontend allowing a user to photograph, geolocate and identify cattle, and an administrative web interface to manage user accounts and input further cattle information. 
 
 \subsubsection{Web Frontend}
-The Web front-end is coded using React.js and Redux, and there is no server side rendering required. For our Web front-end to work there only needs to be a server serving static files, thus making our Web front-end highly performant and scalable.
+The Web front-end is implemented using React.js and Redux, which are JavaScript libraries used to build user interfaces. These libraries allow us, during development, to modify the WebView style and content and view the changes without the need to re-render a page. This allows to perform a number of action:
+
+\begin{itemize}
+	\item modify the state of the application to display a particular components (registration form, deleting form, etc...)
+	\item display a modified information without the need to re-render the whole page
+	\item the possibility to navigate between different pages and storing the information, so that there is no need to make a server call every time we open a specific page
+\end{itemize}
 
 \subsubsection{Mobile Frontends}
 
