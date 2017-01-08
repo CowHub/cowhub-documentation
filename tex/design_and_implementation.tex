@@ -86,20 +86,41 @@ The three different kinds of the Lambda processes include:
 The process of matching is similar to that of MapReduce, and so is the implementation. The only difference, through the use of AWS Lambda, is that we do not provision or administer the servers ourselves - the computational units are spawned ad hoc and only whenever needed.
 
 \subsection{Mobile and Web Front-ends}
+
+Our plan when designing the front-end was to support a number of platforms, ideally sharing the same codebase while still providing a native experience to the user. The requirement is to provide a mobile frontend allowing a user to photograph, geolocate and identify cattle, and an administrative web interface to manage user accounts and input further cattle information. 
+
+\subsubsection{Web Frontend}
+The Web front-end is coded using React.js and Redux, and there is no server side rendering required. For our Web front-end to work there only needs to be a server serving static files, thus making our Web front-end highly performant and scalable.
+
+\subsubsection{Mobile Frontends}
+
+Both the mobile and web frontends access the same API provided by the backend and have many common actions, so in order to share and reuse as much code as possible we implement the mobile interface using the same web technologies as the web frontend, using React and Redux running inside a WebView which is wrapped into a standalone application by Apache's Cordova framework. This is known as a "hybrid" structure, since the same application will run unmodified in a browser as well as standalone applications on mobile devices. This approach presents us with a number of advantages:
+
+\begin{itemize}
+	\item all of the high-level application logic is written in JavaScript, giving the same behaviour cross-platform, meaning that we can start the development without any prior platform-specific knowledge;
+	\item agile development of the application is allowed with extremely quick prototyping and deployment  - the application can be tested and modified in a browser on a desktop, rather than having to compile and run a native application in an emulator or on a physical device;
+	\item most of the Node.js libraries are made available for use: React.js and Redux as used in the web frontend for example, as well as HTML5 libraries for geolocation and ondevice image manipulation;
+	\item allows us to support a large number of platforms quickly, since Cordova is available on almost all modern mobile operating systems;
+\end{itemize}
+
+Downsides include:
+
+\begin{itemize}
+	\item poor performance from extensive use of Webview. Web components will render much more slowly than using OS provided native components. The lack of OS optimisation results in increased battery consumption;
+	\item access to low-level and platform dependant features are limited and involve extensive use of plugins to Cordova, these cannot be tested in the browser, are often poorly documented and can be tricky to manage, as opposed to OS provided APIs which can often be easily dropped in. HTML5 features are dependant on the system browser providing the Webview. Android suffers from a large amount of fragmentation, with many devices shipping different Android versions and browsers. This means it is difficult to guarantee that the application will work on a certain device, whereas with a native application the systems package installer will be able to determine if a device is compatible. HTML5 features are also not available while the application is running in the background, since the Webview is paused. This can affect access to features such as geolocation;
+	\item it can be difficult to provide a "native" experience, since system provided components need to be recreated with web elements;
+\end{itemize}
+ 
+
 Our mobile application supports Android and iOS platforms. There is no plan on supporting Windows Phone in the foreseeable future.
 
 To assist the development process in a rather short period of time, we have decided to use a cross-platform solution to build our app on. More specifically, we have employed Apache Cordova~\cite{cordova} framework as the foundation block of our app, and most of the application level programming is done in JavaScript. This implies that our apps have the so-called ``hybrid'' structure where
 
-\begin{itemize}
-	\item the interface prototyping is done in a unified manner, in JavaScript and styling in CSS - meaning that it will produce the same layout across different platforms because the interface is shown through a WebView\footnote{An important assumption made here is that the WebView will behave uniformly for the subset of layout techniques that we have used. Thanks to the use of WebKit rendering engine on both platforms and the standardised protocols and guidelines for the Web this assumption can be, to a degree, thought as true.};
-	\item most of the higher level logic is written in JavaScript, giving the same behaviour cross-platform, meaning that we can start the development without any prior platform-specific knowledge;
-	\item agile development of the application is allowed as there is little to none compilation required for the application to be built;
-	\item most of the Node.js libraries are made available for use: React.js and Redux, for example;
-\end{itemize}
+
 
 The use of the the ``hybrid'' structure also yields certain disadvantages compared to developing the application natively. For example, the performance will, to some extent, suffer from the extensive use of WebView, and so will the battery life; access to low-level and platform dependent features are limited, and requires more fiddling\footnote{Normally through the native interface of the framework.} for it to work. But clearly for the amount of time given, and the state of the framework those disadvantages are out-weighted by the advantages listed above.
 
-The Web front-end is coded using React.js and Redux, and there is no server side rendering required. For our Web front-end to work there only needs to be a server serving static files, thus making our Web front-end highly performant and scalable.
+
 
 The front-ends are all stateless, meaning that they will run independently. Another important implication is that users can develop their own front-end easily, should they feel that the provided front-ends are not for their taste.
 
