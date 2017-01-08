@@ -116,15 +116,15 @@ Downsides include:
 	\item access to low-level and platform dependant features are limited and involve extensive use of plugins to Cordova, these cannot be tested in the browser, are often poorly documented and can be tricky to manage, as opposed to OS provided APIs which can often be easily dropped in. HTML5 features are dependant on the system browser providing the Webview. Android suffers from a large amount of fragmentation, with many devices shipping different Android versions and browsers. This means it is difficult to guarantee that the application will work on a certain device, whereas with a native application the systems package installer will be able to determine if a device is compatible. HTML5 features are also not available while the application is running in the background, since the Webview is paused. This can affect access to features such as geolocation;
 	\item it can be difficult to provide a "native" experience, since system provided components need to be recreated with web elements;
 \end{itemize}
+
+We quickly realised that the view rendering code for the mobile interface would have to differ from the web interface. Users on mobile platforms expect content to be spread over a number of concise pages, with clean and smooth page transitions and navigation, as opposed to desktop web interfaces, which tend to have more screen real estate available so more content is displayed with fewer page clicks preferred. React-router, which we use for navigation on the web front-end, does not provide page transitions out of the box.
+
+Our mobile front-ends attempt to simulate a "native" interface using the Onsen UI framework. Onsen provides a navigator class that renders pages and provides navigation between them, but most crucially also provides react components which are styled as native components. Onsen contains components styled for both Android and iOS, and after detecting what OS the Webview is running in, applies the appropriate style. When a future release of Onsen supporting Windows Phone is released, a third port of the mobile frontend will be trivial to implement.
+
+
+The Onsen navigator component does not currently support controlling navigation through Redux, so our frontends provide a wrapper for the navigator, allowing us to achieve reliable navigation dispatched through redux actions. 
  
 
-Our mobile application supports Android and iOS platforms. There is no plan on supporting Windows Phone in the foreseeable future.
-
-To assist the development process in a rather short period of time, we have decided to use a cross-platform solution to build our app on. More specifically, we have employed Apache Cordova~\cite{cordova} framework as the foundation block of our app, and most of the application level programming is done in JavaScript. This implies that our apps have the so-called ``hybrid'' structure where
-
-
-
-The use of the the ``hybrid'' structure also yields certain disadvantages compared to developing the application natively. For example, the performance will, to some extent, suffer from the extensive use of WebView, and so will the battery life; access to low-level and platform dependent features are limited, and requires more fiddling\footnote{Normally through the native interface of the framework.} for it to work. But clearly for the amount of time given, and the state of the framework those disadvantages are out-weighted by the advantages listed above.
 
 
 
