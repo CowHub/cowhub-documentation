@@ -20,3 +20,26 @@ As of now we require the farmer to upload the information of a cattle manually. 
 Furthermore we could allow users to push the (updated) information back into the government database for two-way synchronisation.
 
 This process is not implementation intensive and can be done rather quickly. The only hinderance is the government approval and support.
+
+\subsection{Logging and Metrics}
+
+We have built a system with a considerable number of complex components. From time to time it has come to us that we would like to collect the running state of the whole system and individual components, and collect diagnostic metrics for us to evaluate the efficiency of the algorithm.
+
+At the moment the system only prints the log onto standard output. Fortunately though the standard output and standard error are captured by the Amazon services. This approach is only fine for the very basic uses. However problems appear when we try and filter/categorise the logs - for example, we might want to find the $k$ recent logs that belongs to the Persistent storage with the keyword $s$. The current approach would require a lot of mundane works including downloading the logs onto a machine that has Perl or other languages handy for text processing.
+
+The metrics are not being collected at this point due to the extent of the project and the short amount of time we are given. However this would be a lovely feature to have for performance analysis reasons - we would like to know how fast the algorithm runs for different types of images and what would possible be the causes that slow the process down and etc. If, in the near future that the algorithm is improved, we would also like to know how much faster is it, and maybe also conduct a memory usage comparison against the previous algorithm. 
+
+The logging system should be fully equipped to do the basic and advanced data filtering and aggregation, preferable with charts and PDF reports. From the past working experiences we understand that there are already widely used and industrially accepted practices which we could easily start to deploy and use. 
+
+\subsection{Stereo Muzzle Reconstruction}
+
+Our project uses the standard 2 dimensional image matching technique. This is an acceptable practice. However, there are issues related to that:
+
+\begin{itemize}
+	\item muzzles are not on a flat surface; in fact, like the earth, it is on rather bumpy and uneven surface. From a geometric point of view, any images we have taken are just a projection of that 3D surface onto a 2D plane, meaning that there will always be skewing to the original object given different angle or camera parameters. This would eventually introduce errors to the matching process.
+	\item we have only taken one projected plane into consideration. To increase the accuracy it might be of the best to not ignore any data useful for matching.
+\end{itemize}
+
+The mentioned issues can easily be resolved if we try and match based on 3D objects. Theoretically, with the right equipments, we would be able to reconstruct the muzzle. Widely used approaches include computational stereo and photometric stereo: the former reconstructs the desired object mathematically~\cite{computational_stereo} whereas the latter does it from illumination\footnote{However this is proven to be more difficult to use as 1) the technique would typically require the surface to be mostly Lambertian however the muzzles are mostly specular and 2) there are also strict requirements for the environmental lighting and camera and object angles across the views.}~\cite{photometric_stereo}.
+
+The actual matching process, surprisingly, does not require a lot of tweaking to work. The key points are mathematically assumed to be $n$ dimensional, and so is the descriptor matcher (as the descriptor is essentially a $n$ dimensional matrix).
