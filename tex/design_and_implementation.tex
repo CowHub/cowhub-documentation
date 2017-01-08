@@ -1,4 +1,4 @@
-CowHub, as opposed to being monolithic, has a number of small, modular components that serve different purposes and form a complete system. Each and every component is capable of running on its own, being built and tested independently and corresponds to a source repository on GitHub. For an overview of all important components, see Figure \ref{fig:structure}.
+Rather than be built as a monolithic block, CowHub has a number of small, modular components that serve different purposes and form a complete system; CowHub is a system of loosely-connected microservices. Each and every component is deployable separately, having been built and tested independently and corresponds to a source repository on GitHub. Each component can be dependent on other services in the system, but these are mocked during the testing stage and implemented fully in production. For an overview of all important components, see Figure \ref{fig:structure}.
 
 \begin{sidewaysfigure}
   \includegraphics[width=\textwidth]{sketch/structure.pdf}
@@ -6,16 +6,16 @@ CowHub, as opposed to being monolithic, has a number of small, modular component
   \label{fig:structure}
 \end{sidewaysfigure}
 
-CowHub employs Amazon Web Services (AWS) for a scalable, robust and stable cloud solution. For this project, the used services include IAM, CloudFront, Route 53, EC2, S3, RDS, Lambda, ElastiCache and API Gateway\footnote{This will later be referred to as Amazon API Gateway for disambiguation.}. The use of each service will be explained further in the following report.
+CowHub uses Amazon Web Services (AWS) for a scalable, robust and stable cloud solution. For this project, the used services include IAM, CloudFront, Route 53, VPC, EC2, S3, RDS, Lambda, ElastiCache and API Gateway\footnote{This will later be referred to as Amazon API Gateway for disambiguation.}. The use of each service will be explained further in the following report.
 
 The report proceeds with respect to the components of the project.
 
 \subsection{Persistent Data Storage}
-The database unit is built on top of Amazon Relational Database Service (RDS) and Amazon Simple Storage Service (S3), and PostgreSQL has been chosen to be the engine of the database service. The database unit aims to provide a simple, scalable and cloud-based database interface for our other services to use. 
+Persistent storage for the application is built on top of Amazon Relational Database Service (RDS) and Amazon Simple Storage Service (S3). PostgreSQL has been chosen to be the engine for the database service. The database unit aims to provide a simple, scalable and cloud-based database interface for our other services to use.
 
 RDS has been chosen because it is an easy solution to a resizable and scalable database, and provides features such as duplication. By employing RDS we could focus more on the application that we are building and pay little to no attention to the time-consuming database administrative tasks.
 
-S3 is used to hold the image uploads. It has been chosen because of its simplicity to use, durable infrastructure and more importantly, its integration with other Amazon and CowHub services.
+S3 is used to hold all file and blob data. It has been chosen because of its persistent, simple, durable infrastructure and more importantly, its integration with other Amazon and CowHub services.
 
 The database is to store the following:
 
@@ -102,7 +102,7 @@ The Web front-end is coded using React.js and Redux, and there is no server side
 
 The front-ends are all stateless, meaning that they will run independently. Another important implication is that users can develop their own front-end easily, should they feel that the provided front-ends are not for their taste.
 
-\subsection{Implementation Difficulties}
+\subsection{Implementation Difficulties And Comments}
 
 % TODO: finish the implementation difficulties section
 
@@ -113,3 +113,12 @@ One serious issue is here is performance, especially in the thinning process\foo
 It has come to us that since we only need to use \texttt{weave} and according to the official documentation, it can be installed as an independent library. Weird enough, it turns out that \texttt{weave} uses \texttt{scipy} internally - meaning that we will not be able to use \texttt{weave} at all.
 
 The only way that's left then is to manually compile the C++ code into an object file for Python to use. Fortunately this is not too difficult: all we need to do is to run the code with \texttt{weave.inline} on a compatible machine and grab the \texttt{weave}-generated C++ file from the cache and for every platform we compile it into an object file and leave it inside the \texttt{lib} directory. This works because \texttt{weave} generates the boilerplate for seamless Python integration. After this step we would be able to replace the code with a call to the generated function in the generated module and remove the requirements for \texttt{weave} and \texttt{scipy}.
+
+\subsubsection{Maintaining Security}
+
+% TODO: Maintaining security comments
+
+\subsubsection{Infrastructure Financial Constraints}
+
+% TODO: Infrastructure financial constraints
+
