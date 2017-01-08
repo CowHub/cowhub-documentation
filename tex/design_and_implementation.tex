@@ -13,9 +13,9 @@ The report proceeds with respect to the components of the project.
 \subsection{Persistent Data Storage}
 Persistent storage for the application is built on top of Amazon Relational Database Service (RDS) and Amazon Simple Storage Service (S3). PostgreSQL has been chosen to be the engine for the database service. The database unit aims to provide a simple, scalable and cloud-based database interface for our other services to use.
 
-RDS has been chosen because it is an easy solution to a resizable and scalable database, and provides features such as duplication. By employing RDS we could focus more on the application that we are building and pay little to no attention to the time-consuming database administrative tasks.
+RDS has been chosen because it is an easy solution to a resizable and scalable database, and provides features such as duplication~\cite{rds}. By employing RDS we could focus more on the application that we are building and pay little to no attention to the time-consuming database administrative tasks.
 
-S3 is used to hold all file and blob data. It has been chosen because of its persistent, simple, durable infrastructure and more importantly, its integration with other Amazon and CowHub services.
+S3 is used to hold all file and blob data. It has been chosen because of its persistent, simple, durable infrastructure and more importantly, its integration with other Amazon and CowHub services~\cite{s3}.
 
 The database is to store the following:
 
@@ -64,7 +64,7 @@ The Job manager is the more interesting part. There are two different types of j
 	\end{enumerate}
 \end{enumerate}
 
-Based on our statistics, step (a) normally takes a half to one second, and every pairwise match in step (c) takes about 5 to 25 milliseconds\footnote{This is due to the resizing and normalisation done prior to the match.}. That is, ignoring the network and IO delays, a match will take about $T = N * t_m / 1000 + t_d / 1000$ seconds to complete, where $t_m \in [5, 40]$ (including the time for de/serialisation) and $t_d \in [500, 1000]$. In this reasoning our computation time can be thought of as upper bounded by $Nc$, where $c \in \mathbb{Q}$, which is totally size-agnostic, because it is based on the assumption that we would always have $\lceil M / N \rceil$ computational units at our disposal. This rational implies that, in theory, the computation time does not generally grow with respect to the number of images in our database\footnote{In practice it does - because we cannot ignore the time consumed for IO actions.}.
+Based on our statistics, step (a) normally takes a half to one second, and every pairwise match in step (c) takes about 5 to 25 milliseconds\footnote{This is due to the resizing and normalisation done prior to the match.}. That is, ignoring the network and IO delays, a match will take about $T = N * t_m / 1000 + t_d / 1000$ seconds to complete, where $t_m \in [5, 40]$ (including the time for de/serialisation) and $t_d \in [500, 1000]$. In this reasoning our computation time can be thought of as upper bounded by $Nc$, where $c$ is a constant, which is totally size-agnostic, because it is based on the assumption that we would always have $\lceil M / N \rceil$ computational units at our disposal. This rational implies that, in theory, the computation time does not generally grow with respect to the number of images in our database\footnote{In practice it does - because we cannot ignore the time consumed for IO actions.}.
 
 \subsection{Key Value Store}
 A cluster of Redis servers is employed through Amazon ElastiCache service. 
@@ -73,7 +73,7 @@ For performance reasons it has been decided that we use a key value store for co
 
 \subsection{Headless Computational Unit}
 \label{sec:lambda}
-The processing is built on top of AWS Lambda services. The headless computational unit supports two different kinds of jobs: registration and matching, as suggested before. A call to the headless computational unit will cause a Lambda calculation unit (Lambda) to be spawned. Lambda processes are running concurrently, and they are not necessarily on the same machine\footnote{It can be thought of as Actors - universal primitives for concurrent computation. Similar constructs implementation include \textit{Akka} for Scala.}.
+The processing is built on top of AWS Lambda services. The headless computational unit supports three different kinds of jobs: registration, job assignment and matching, as suggested before. A call to the headless computational unit will cause a Lambda calculation unit (Lambda) to be spawned~\cite{lambda}. Lambda processes are running concurrently, and they are not necessarily on the same machine\footnote{It can be thought of as Actors - universal primitives for concurrent computation. Similar constructs implementation include \textit{Akka} for Scala.}.
 
 The three different kinds of the Lambda processes include:
 
@@ -89,7 +89,7 @@ The process of matching is similar to that of MapReduce, and so is the implement
 \subsection{Mobile and Web Front-ends}
 Our mobile application supports Android and iOS platforms. There is no plan on supporting Windows Phone in the foreseeable future.
 
-To assist the development process in a rather short period of time, we have decided to use a cross-platform solution to build our app on. More specifically, we have employed Apache Cordova \cite{cordova} framework as the foundation block of our app, and most of the application level programming is done in JavaScript. This implies that our apps have the so-called ``hybrid'' structure where
+To assist the development process in a rather short period of time, we have decided to use a cross-platform solution to build our app on. More specifically, we have employed Apache Cordova~\cite{cordova} framework as the foundation block of our app, and most of the application level programming is done in JavaScript. This implies that our apps have the so-called ``hybrid'' structure where
 
 \begin{itemize}
 	\item the interface prototyping is done in a unified manner, in JavaScript and styling in CSS - meaning that it will produce the same layout across different platforms because the interface is shown through a WebView\footnote{An important assumption made here is that the WebView will behave uniformly for the subset of layout techniques that we have used. Thanks to the use of WebKit rendering engine on both platforms and the standardised protocols and guidelines for the Web this assumption can be, to a degree, thought as true.};
