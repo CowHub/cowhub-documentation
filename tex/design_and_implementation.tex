@@ -83,6 +83,7 @@ The two different kinds of the Lambda processes include:
 
 The process of matching is similar to that of Map Reduce, and so is the implementation. The only difference, through the use of AWS Lambda, is that we do not provision or administer the servers ourselves - the computational units are spawned ad hoc and only whenever needed.
 
+
 \subsection{Mobile and Web Front-ends}
 Our mobile application supports Android and iOS platforms. There is no plan on supporting Windows Phone in the foreseeable future.
 
@@ -100,3 +101,13 @@ The use of the the ``hybrid'' structure also yields certain disadvantages compar
 The Web front-end is coded using React.js and Redux, and there is no server side rendering required. For our Web front-end to work there only needs to be a server serving static files, thus making our Web front-end highly performant and scalable.
 
 The front-ends are all stateless, meaning that they will run independently. Another important implication is that users can develop their own front-end easily, should they feel that the provided front-ends are not for their taste.
+
+\subsection{Implementation Difficulties}
+
+\subsubsection{Headless Computational Unit}
+
+One serious issue is here is performance, especially in the thinning process\footnote{Zhang-Suen thinning algorithm.} as the computational task is quite substantial. In this special case, it is required to inline C++ code as opposed to having pure Python code for the thinning iteration\footnote{The inline version runs within 600ms with IO whereas the pure Python version just times out after 10 seconds.}. The recommended approach is to use \texttt{weave} from \texttt{scipy} to inline the small piece of code. However this has proven to be not so easy: Amazon Lambda has a (code) package size limit of 250MB, and \texttt{scipy} itself is over 200MB - this implies that there is no way that we can use \texttt{scipy}.
+
+It has come to us that since we only need to use \texttt{weave} and according to the official documentation, it can be installed as an independent library. Weird enough, it turns out that \texttt{weave} uses \texttt{scipy} internally - meaning that we will not be able to use \texttt{weave} at all.
+
+The only way that's left then is to manually compile the C++ code into an object file for Python to use. Fortunately this is not too difficult: all we need to do is to run the code with \texttt{weave.inline} on a compatible machine and grab the \texttt{weave}-generated C++ file from the cache and for every platform we compile it into an object file and leave it inside the \texttt{lib} directory. This works because \texttt{weave} generates the boilerplate for seamless Python integration. After this step we would be able to replace the code with a call to the generated function in the generated module and remove the requirements for \texttt{weave} and \texttt{scipy}.
