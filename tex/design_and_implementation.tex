@@ -58,13 +58,13 @@ The Job manager is the more interesting part. There are two different types of j
 	\item Cattle matching job. A job ID is required for this type of job as 1) we need to be able to track the status of the ongoing job and 2) we need to save the match result for statistical purposes. The process, roughly, includes (in the following order):
 	\begin{enumerate}
 		\item Generate the descriptor for the image to be matched.
-		\item Divide the database of images into chunks with size $N$\footnote{A predefined value. For the proof of concept we have chosen 25.}, label each chunk with an ID $\text{id}_i$.
-		\item For each chunk with ID $\text{id}_i$, forward the ID, the job ID and the image descriptor to the headless computational unit and wait for a best match within the chunk to be handed back. The headless computational unit will run asynchronously for all calls.
-		\item Aggregate the result for a best match. Write the best match into the database and return it to the caller.
+		\item Divide the database of images into chunks with size $N$\footnote{A predefined value. For the proof of concept we have chosen 25.}, label each chunk with an ID $\text{id}_i$. This will be submitted by the API, but carried out by the Job Assignment Lambda.
+		\item For each chunk with ID $\text{id}_i$, forward the ID, the job ID and the image descriptor to the headless computational unit (the Matching Lambda) and wait for a best match within the chunk to be handed back to the cache accordingly (details in~\ref{sec:lambda}).
+		\item Retrieve the best match from the cache service and forward it back to the requester.
 	\end{enumerate}
 \end{enumerate}
 
-Based on our statistics, step (a) normally takes a half to one second, and every pairwise match in step (c) takes about 30 to 80 milliseconds\footnote{This is due to the resizing and normalisation done prior to the match.}. That is, ignoring the network and IO delays, a match will take about $T = N * t_m / 1000 + t_d / 1000$ seconds to complete, where $t_m \in [30, 80]$ and $t_d \in [500, 1000]$. In this reasoning our computation time can be thought of as upper bounded by $Nc$, where $c \in \mathbb{Q}$, which is totally size-agnostic, because it is based on the assumption that we would always have $\lceil M / N \rceil$ computational units at our disposal. This rational implies that, in theory, the computation time does not generally grow with respect to the number of images in our database\footnote{In practice it does - because we cannot ignore the time consumed for IO actions.}.
+Based on our statistics, step (a) normally takes a half to one second, and every pairwise match in step (c) takes about 5 to 25 milliseconds\footnote{This is due to the resizing and normalisation done prior to the match.}. That is, ignoring the network and IO delays, a match will take about $T = N * t_m / 1000 + t_d / 1000$ seconds to complete, where $t_m \in [5, 40]$ (including the time for de/serialisation) and $t_d \in [500, 1000]$. In this reasoning our computation time can be thought of as upper bounded by $Nc$, where $c \in \mathbb{Q}$, which is totally size-agnostic, because it is based on the assumption that we would always have $\lceil M / N \rceil$ computational units at our disposal. This rational implies that, in theory, the computation time does not generally grow with respect to the number of images in our database\footnote{In practice it does - because we cannot ignore the time consumed for IO actions.}.
 
 \subsection{Key Value Store}
 A cluster of Redis servers is employed through Amazon ElastiCache service. 
@@ -72,16 +72,18 @@ A cluster of Redis servers is employed through Amazon ElastiCache service.
 For performance reasons it has been decided that we use a key value store for concurrent and lively access for the descriptor of an image. This store is to be accessed very frequently and as only a small piece of data is being extracted at once it seemed inappropriate to be using a database. Another reason that a key value store is used, as opposed to accessing the descriptor directly from the database unit is data separation - the only place that this data is being accessed is the headless computational unit and nothing more. Also, as suggested before, the database unit is only accessible through the API, and any access directly from other components would break the promise; alternatively, to access the descriptors through the API would introduce significant (and unnecessary) burden to the API itself and result in great performance problems.
 
 \subsection{Headless Computational Unit}
+\label{sec:lambda}
 The processing is built on top of AWS Lambda services. The headless computational unit supports two different kinds of jobs: registration and matching, as suggested before. A call to the headless computational unit will cause a Lambda calculation unit (Lambda) to be spawned. Lambda processes are running concurrently, and they are not necessarily on the same machine\footnote{It can be thought of as Actors - universal primitives for concurrent computation. Similar constructs implementation include \textit{Akka} for Scala.}.
 
-The two different kinds of the Lambda processes include:
+The three different kinds of the Lambda processes include:
 
 \begin{enumerate}
 	\item Registration Lambda. This is a one way communication. The caller (the API) calls the headless computational unit, causing a Registration Lambda to be spawned. This Lambda process will run to the end (the generation of the descriptor of an image) and then store it into the Key Value store.
-	\item Matching Lambda. The caller will need to call the headless computational unit with the job detail, and the Matching Lambda will run the match for $N$ images as discussed before. This process is running concurrently. Upon finishing the process, the Lambda will forward the best match within a batch of $N$ images back to the caller as notification.
+	\item Job Assignment Lambda. The API would have to submit the image to be matched and trigger the Job Assignment Lambda. This Lambda will slice the existing descriptors into $n=\lceil M / N \rceil$ chunks, and invoke $n$ Matching Lambdas asynchronously.
+	\item Matching Lambda. The caller will need to call the headless computational unit with the job detail, and the Matching Lambda will run the match for $N$ images as discussed before. This process is completely concurrent. Upon completion of the process, the Lambda will write the best match within a batch of $N$ images back to the cache service if the match is better than the current one in the cache.
 \end{enumerate}
 
-The process of matching is similar to that of Map Reduce, and so is the implementation. The only difference, through the use of AWS Lambda, is that we do not provision or administer the servers ourselves - the computational units are spawned ad hoc and only whenever needed.
+The process of matching is similar to that of MapReduce, and so is the implementation. The only difference, through the use of AWS Lambda, is that we do not provision or administer the servers ourselves - the computational units are spawned ad hoc and only whenever needed.
 
 
 \subsection{Mobile and Web Front-ends}
