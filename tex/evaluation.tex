@@ -77,11 +77,11 @@ It has been briefly discussed about the algorithm performance and the discussion
 
 and GPU acceleration turned off.
 
-A simple test (with a sample size of 144 pairwise image matches) yields the following result, note that the cropping and descriptor generation are for two images (unit: ms):
+A simple test (with a sample size of 144 pairwise image matches) yields the following result, note that the edge and descriptor generation are for two images (unit: ms):
 
 \begin{center}
 \begin{tabular}{c|c c c}
-        & Image Cropping & Descriptor Generation & Matching \\
+        & Edge Generation & Descriptor Generation & Matching \\
 \hline
 Mean    & $135.20$       & $482.91$              & $47.15$  \\
 Medium  & $136.68$       & $450.11$              & $42.77$  \\
@@ -89,7 +89,7 @@ SD      & $11.87$        & $91.72$               & $28.79$
 \end{tabular}
 \end{center}
 
-Note that image cropping and descriptor generation are only done once for each request. The total time then is bound by the formula $N * t_m + t_d$ where $N$ is a fixed number, ignoring the time for IO actions. The running time is not upper bounded by the data size even though the matching process is essentially pairwise as an important assumption we have made is that we always have as many Lambda instances at our disposal as we want by our design.
+Note that edge and descriptor generation are only done once for each request. The total time then is bound by the formula $N * t_m + t_d$ where $N$ is a fixed number, ignoring the time for IO actions. The running time is not upper bounded by the data size even though the matching process is essentially pairwise as an important assumption we have made is that we always have as many Lambda instances at our disposal as we want by our design.
 
 An box-plot visualisation of the data is shown in the combined plot ~\ref{fig:algo_visual_all}.
 
