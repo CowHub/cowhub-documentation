@@ -1,1 +1,54 @@
-% TODO: EVALUATION
+
+\subsection{Bootstrap and Lifecycle}
+
+The different components of the system runs independently from each other. However, still, connection needs to be established to form the whole system. The said connections are not created eagerly, though, as to avoid the looping issues with (possible) cyclic dependency and to reduce the bootstrap time.
+
+For the front-ends, as they are only created when needed, they do not to fit in the bootstrap stage. They will be able to work fine as long as the system is online at the time of use. 
+
+The structure of the system suggests the explicit dependencies of the system:
+
+\begin{itemize}
+	\item The API is dependent on the Persistent Storage as the API does not hold any data at the time of bootstrap.
+	\item The API and Lambda depend on the Key Value Store.
+\end{itemize}
+
+and the implicit ones:
+
+\begin{itemize}
+	\item S3 should be present whenever API and Lambda is available as it serves as a mean to invoke the Lambda instances for the API.
+	\item We have used the Redis (Key Value Store engine) Channel for Lambda state monitoring.
+\end{itemize}
+
+Topologically a reasonable bootstrap order, then, would be\footnote{That is, we sort the items based on a order that takes the dependencies into consideration. For more information regarding topological sort please see https://en.wikipedia.org/wiki/Topological\_sorting.}.
+
+\begin{enumerate}
+	\item[1] Persistent Storage Unit
+	\item[1] Key Value Store
+	\item[2] The API
+	\item[3] Lambda\footnote{Lambda is quite special in terms of lifecycle. See below for detailed information.}
+\end{enumerate}
+
+where the order of items with the same number are inter-exchangeable.
+
+Different components behave in different manners, in terms of its lifecycle:
+
+\begin{itemize}
+	\item The API resides inside Docker running on EC2. The actual deployment, scaling and provisioning are done through AWS Elastic Beanstalk~\cite{beanstalk}. We have also assumed that unless under special cases such as necessary offline maintenance or system upgradeing, the service will not be offline. AWS Beanstalk will automatically re-boot the API if, under exceptional circumstances, the API goes down.
+	\item The nature of persistence of the API naturally requires the persistence of the Persistent Storage Unit and Key Value Storage. Fortunately, due to the use of AWS RDS, S3 and ElastiCache there is no need for manual management of the components lifecycle.
+	\item Lambda is a special type of unit. Lambda instances are only fired up whenever there is a cattle registration or match request coming in, and will be instantly destroyed/disregarded when the computation is done to save the resources. Lambda instances then have a very short lifecycle, and are fairly lightweight to bootstrap\footnote{In fact the bootstrap of each Lambda instance only requires the the connection to the Key Value Store. This process takes little to no time as they both are close both geographically and in the network.}.
+\end{itemize}
+
+Unfortunately, under certain cases, the services might have to be shut down. The order of shut down is rather different compare to that of bootstrap:
+
+\begin{enumerate}
+	\item The API needs to be notified first, as to stop accepting new requests.
+	\item If there are running Lambda instances, wait for them to run to finish. This is acceptable as Lambda instances are programmed as lightweight computational units and generally a very small (~15 seconds) running time limit is imposed on all Lambda instances.
+	\item The Persistent Storage Unit.
+	\item The Key Value Store. However, extra care must be taken in the shutdown process of the Key Value Store to keep the data. Fortunately it is being backed up daily and at time of shutdown automatically.
+\end{enumerate}
+
+\subsection{Use of ElastiCache}
+
+Unlike the name suggests, ElastiCache is not employed as a cache engine from a programming point of view, because we have assumed that the saved key-value pairs will always be available unless otherwise indicated. In our design the system uses Redis, the Key-Value storage to store the descriptors to reduce the running time of the matching process - a suggestion of, from a philosophical point of view, a caching process.
+
+From the previous subsection it is pointed out that the data in the key-value store is being kept. This is not the ideal use case of any cache engine; however, in the future iterations, it has been agreed on that the system will handle the cache miss should it ever happen as a way to make the system more robust.
