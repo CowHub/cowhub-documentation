@@ -143,12 +143,15 @@ Our mobile front-ends attempt to simulate a "native" interface using the Onsen U
 
 
 The Onsen navigator component does not currently support controlling navigation through Redux, so our frontends provide a wrapper for the navigator, allowing us to achieve reliable navigation dispatched through redux actions. 
+
+Our front-ends are written in ES6 JavaScript, allowing clearer code style, proper classes and native modules. This makes it easy to define modules which can be easily tested and reused. We use the babel transpiler and Webpack to produce ES5 code that will run in current phone browsers since ES6 support is limited. 
  
 One of the largest challenges was implementing the camera view. While Cordova ships with a camera plugin, it simply calls the system camera, meaning that you are not able to overlay custom text and graphics such as a muzzle overlay for lining up an image of cattle correctly. If we had written a native application for Android, the functionality could have been easily achieved by building a custom camera component. Cordova also allows custom OS plugins to be added, so with some difficulty we could have imported a custom camera application. However this approach would mean writing a custom camera ourselves for each platform we wish to support. This would have been time-consuming to implement and maintain given the time-constraints of the project. Ultimately we solved this issue by using an opensource\footnote{The author has added a morality clause to a standard MIT license, restricting use in applications which are considered illegal}  augmented reality plugin called ezAR. 
 
 EzAR is a collection of packages amongst which there is a video overlay and a snapshot plugin. The video overlay activates the camera and displays the live camera feed behind the Webview. We are able to produce a custom camera view using react components, and use a modified Onsen to create transparent pages so the camera view can be seen. The snapshot plugin was originally designed to allow you to take screenshots of an application by grabbing an image from the camera and rendering the Webview on top of the image. By using a special debugging flag the plugin will return only the camera image. This means we can re-purpose the plugin as full custom camera. In the future native camera plugins can simply be slotted in in it's place.
 
 By using Redux we are able to separate the core application logic from the view, opening up the ability to share logic with the web front-end and since the reducers are all pure functions this logic is easy to test.
+
 
 In general despite expected difficulties with access to low level features, the hybrid application approach has allowed us to implement a well structured easily extensible front-end withing the tight time constraints of this project.
 
