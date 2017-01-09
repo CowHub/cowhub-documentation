@@ -96,9 +96,15 @@ The Web front-end is implemented using React.js and Redux, which are JavaScript 
 
 \begin{itemize}
 	\item modify the state of the application to display a particular components (registration form, deleting form, etc...)
-	\item display a modified information without the need to re-render the whole page
+	\item display modified information or a different style without the need to re-render the whole page
 	\item the possibility to navigate between different pages and storing the information, so that there is no need to make a server call every time we open a specific page
 \end{itemize}
+
+Even if seeing the newly modified display without having to re-render a page is a nice features to have when developing a web interface rapidly it has also it's cons, such as:
+\begin{itemize}
+	\item writing React components is less straight forward than writing pure HTML code for coding a web gpage
+	\item React does not offer any router nor model management libraries which makes routing between different pages more complex
+\end{itemize} 
 
 \subsubsection{Mobile Frontends}
 
