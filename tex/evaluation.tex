@@ -93,35 +93,42 @@ Note that edge and descriptor generation are only done once for each request. Th
 
 An box-plot visualisation of the data is shown in the combined plot ~\ref{fig:algo_visual_all}.
 
-\begin{figure}
-  \includegraphics[width=\textwidth]{sketch/all.pdf}
-  \caption{The combined algorithm runtime plot}
-  \label{fig:algo_visual_all}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{sketch/all.pdf}
+	\caption{The combined algorithm runtime plot}
+	\label{fig:algo_visual_all}
 \end{figure}
 
 The visualisation clearly suggests that the runtime of the algorithm is rather stable all but for the descriptor generation process. This proves that the runtime will be acceptable in our case for a pairwise matching.
 
-\subsection{Implementation Difficulties And Comments}
+\subsection{Performance of Serverless Architecture}
 
-% TODO: finish the implementation difficulties section
+There is a serious issue with performance loss on the serverless AWS  serious issue here is performance, especially in the thinning process\footnote{Zhang-Suen thinning algorithm.} as the computational task is quite substantial. In this special case, it is required to inline C++ code as opposed to having pure Python code for the thinning iteration\footnote{The inline version runs within 600ms with IO whereas the pure Python version just times out after 10 seconds.}. The recommended approach is to use \texttt{weave} from \texttt{scipy} to inline the small piece of code. However this has proven to be not so easy: AWS Lambda has a (code) package size limit of 250MB, and \texttt{scipy} itself is over 200MB - this implies that there is no way that we can use \texttt{scipy}.
 
-\subsubsection{Performance of Serverless Architecture}
+Since we only need to use \texttt{weave}, we installed it as an independent library. However, we found that since \texttt{weave} uses \texttt{scipy} internally, this was not a solution at all and we were back to square one.
 
-There is a serious issue with performance loss on the serverless AWS  serious issue here is performance, especially in the thinning process\footnote{Zhang-Suen thinning algorithm.} as the computational task is quite substantial. In this special case, it is required to inline C++ code as opposed to having pure Python code for the thinning iteration\footnote{The inline version runs within 600ms with IO whereas the pure Python version just times out after 10 seconds.}. The recommended approach is to use \texttt{weave} from \texttt{scipy} to inline the small piece of code. However this has proven to be not so easy: Amazon Lambda has a (code) package size limit of 250MB, and \texttt{scipy} itself is over 200MB - this implies that there is no way that we can use \texttt{scipy}.
+We were left with no choice but to manually compile the C++ code into an object file for Python to use. Fortunately this is not too difficult: we needed to run the code with \texttt{weave.inline} on a compatible machine and grab the \texttt{weave}-generated C++ file from the cache. For every platform we require, we compile it into an object file and store it in the \texttt{lib} directory. This works because \texttt{weave} generates the boilerplate for seamless Python integration. After this step we would be able to replace the code with a call to the generated function in the generated module and remove the requirements for \texttt{weave} and \texttt{scipy}.
 
-It has come to us that since we only need to use \texttt{weave} and according to the official documentation, it can be installed as an independent library. Weird enough, it turns out that \texttt{weave} uses \texttt{scipy} internally - meaning that we will not be able to use \texttt{weave} at all.
+\subsection{Maintaining Security}
 
-The only way that's left then is to manually compile the C++ code into an object file for Python to use. Fortunately this is not too difficult: all we need to do is to run the code with \texttt{weave.inline} on a compatible machine and grab the \texttt{weave}-generated C++ file from the cache and for every platform we compile it into an object file and leave it inside the \texttt{lib} directory. This works because \texttt{weave} generates the boilerplate for seamless Python integration. After this step we would be able to replace the code with a call to the generated function in the generated module and remove the requirements for \texttt{weave} and \texttt{scipy}.
+Part of the brief for this project was to maintain the security of the intellectual property created at all times. When deploying the application, this sometimes resulted in a debugging process which was very obfuscated owing to the closed-down nature of what we deployed. For example, we chose to not have SSH access into our API gateway instances in order to reduce the attackable surface area.
 
-\subsubsection{Maintaining Security}
+Furthermore, all data for the application is contained within a private subnet within a virtual private cloud such that it has no direct connection to the internet, and therefore is not subject to attack. This made some parts of deployment difficult, since our network configuration had to be created such that the compute elements of the system were able to be accessed from the internet, whilst connecting to and using data from the internet-inaccessible data layer.
 
-% TODO: Maintaining security comments
+By using AWS IAMs, we were able to further isolate the abilities of individual actors in the system, reducing the attack surface to it's minimum, and providing a means to determine the exact source of an attack should one occur.
 
-\subsubsection{Infrastructure Financial Constraints}
+\subsection{Infrastructure Financial Constraints}
 
-% TODO: Infrastructure financial constraints
+One of the key problem sources during our project was infrastructure. The infrastructure was the only part of the project which would have a cost directly attached to it. We were given available hardware through the university's hardware program exposing a choice of machines running through Apache CloudStack. We started our project with these machines, finding deployment to be very time consuming and unreliable. Furthermore, owing to the modern technologies we deployed, some software, such as GitLab CI, seemed unoptimised and ran incredibly slowly, further delaying deployment and iterations.
 
-\subsubsection{Keeping The API Gateway Performant}
+Therefore, as the project progressed, we researched using professional cloud service providers which offered completely custom software, some of which would largely handle deployment in an automated fashion. We researched using both Microsoft Azure and Amazon Web Services (AWS) \footnote{Credits were available for both platforms through a university affiliation program.}, eventually choosing AWS for it's superior software package and unrivalled functionality in AWS lambda. 
 
-% TODO: Keeping the API Gateway Performant
+Using AWS lambda, a pure functional environment designed to be deployed as a software package and be triggered and executed in parallel across hundreds of machines gave us performance that we couldn't hope to emulate without many more hours of development, deployment, and financial burden. With low cost pricing and a generous free allowance \footnote{AWS provides 3,200,000 GB/seconds for free per month as part of it's free tier at the time of writing}, we were able to develop an instantly scalable, efficient system to provide the backbone of our image processing and identification.
+
+The experience of using multiple providers in this scenario brought a clear conclusion. Whilst for all intents and purposes each provider is offering some identical unit of compute at slightly different price points, the implementation and use of that unit of compute differs astronomically through the software layer atop the hardware. It would be unfathomable to conceive a competitor to AWS lambda running on commodity hardware in the time period available to this project, and consequently, the group found that in order to make the project a success we were somewhat required to use paid services.
+
+Before transitioning to using AWS, backed by GitHub and CircleCI for version control and continuous integration respectively, the proportion of our time we spent on deployment and systems issues was vastly higher than we would have liked. After moving to AWS, this time became nominal as we were able to rely on a dependable platform for service delivery.
+
+In conclusion, should we have remained with the provided commodity hardware using a basic software layer, we wouldn't have had a financial burden but we wouldn't have achieved the success that we have with the project either. 
 
