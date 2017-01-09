@@ -1,46 +1,46 @@
-
 \subsection{Machine Learning}
 
-Up till this point, only a very standard edge matching method is used and the process is purely mathematical. This exports some rather serious problems:
+The current implementation uses a standard edge matching method, with the matching process remaining purely mathematical. Such a limitation exposes some rather serious problems:
 
 \begin{itemize}
-	\item some useful characteristics are always being ignored (eye colour and muzzle shape, for instance) without proper handling. We understand that as human, those characteristics can be easily commissioned to assist our recognition process without us realising about it but mathematically those features are proven to be difficult to deal with;
-	\item we have assumed that the images uploaded are usable - that is, the majority of the image displays the muzzle of a cattle rather clearly; but in reality this is generally not the case: the muzzle might be wet, making the edge extraction impossible; or the blurs caused by camera movement. A pure mathematical function, in essence, cannot deal with imperfect input that is beyond its input domain.\footnote{However we do have, to some extent, normalisation and correctional processes that de-skew and rotate the image.}
+	\item Useful characteristics are always ignored (eye colour and muzzle shape, for example) without proper handling. As human beings we use characteristics to aid and improve our ability to recognise and identify. During our innate recognition process, we use such features subconsciously, without realising. However, mathematically such features have proven difficult to process and understand reliably
+	\item We assume images uploaded are usable, that is, the majority of the image displays the muzzle of a cattle clearly enough to provide a consistent and correct result. In reality, this is generally not the case as there are several circumstances when the image may not be useable: the muzzle might be wet, making the edge extraction impossible; blurriness caused by camera movement falsifies any identification result. 
+		A pure mathematical function, in essence, cannot deal with imperfect input beyond its input domain.\footnote{However we do have, to some extent, normalisation and correctional processes that de-skew and rotate the image.}
 \end{itemize}
 
-In the modern world those problem (or at least part of it) can be tackled using Machine Learning techniques. For example, we can use machine learning to identify a cattle from an image - just as we can using facial recognition on image of humans; or to outline an area of interest, aka filtering out the parts that are not of any importance (i.e. the background).
+In the modern world these problems (or at least a proportion of them) can be tackled using machine learning techniques. For example, we can use machine learning to identify a cattle from an image - similarly to using facial recognition on image of humans, or an algorithm to find an apple in a photograph of different fruits; or to outline an area of interest, a.k.a. filtering out the parts that are not of any importance (i.e. the background).
 
-So far the only thing preventing us from using ML is the size of our training data. For this project, unfortunately, we have almost none usable training data (only a few images were provided, none of which is of any use as there is not even any ID associated with those images).
+So far the only thing preventing us from using machine learning is the size of our training data. For this project, unfortunately, we have almost no usable training data (only a few images were provided, none of which is of any use as there is not even any ID associated with those images). Whilst this contribution to allow us to develop has been much appreciated, it would be necessary to have a significantly larger training set to get any worthwhile improvement to the algorithm.
 
-We have been actively collecting the user uploaded data (with their consent) and the result and feedback of a match so that the neural network can be properly trained to a usable state.
+Upon starting the project, we were very kindly given a set of high quality images of various cattle muzzles in different conditions. Whilst these have been pivotal in allowing us to accelerate the project's success, we would need a colossal set of training data to use as a training set in order to use machine learning to tailor the identification process.
 
 \subsection{Integration with the Government Database}
 
 As of now we require the farmer to upload the information of a cattle manually. This is a mundane and repetitive process and requires a lot of patience. To speed up the process and make it less error-prone, we want to integrate the system with the existing government database to allow the users to pull the data straight from the database without any manual input, provided that the users identity is verified and he/she has the permission to pull the requested cattle data.
 
-Furthermore we could allow users to push the (updated) information back into the government database for two-way synchronisation.
+Furthermore, we could allow users to push the (updated) information back into the government database for two-way synchronisation.
 
-This process is not implementation intensive and can be done rather quickly. The only hinderance is the government approval and support.
+This process is not implementation intensive and can be done rather quickly. The only hinderance, is the government approval and support.
 
 \subsection{Logging and Metrics}
 
-We have built a system with a considerable number of complex components. From time to time it has come to us that we would like to collect the running state of the whole system and individual components, and collect diagnostic metrics for us to evaluate the efficiency of the algorithm.
+We have built a system with a considerable number of complex components. It would be interesting to collect the running state of the whole system and individual components as well as collect diagnostic metrics. This would help us evaluate the efficiency and performance of our platform.
 
-At the moment the system only prints the log onto standard output. Fortunately though the standard output and standard error are captured by the Amazon services. This approach is only fine for the very basic uses. However problems appear when we try and filter/categorise the logs - for example, we might want to find the $k$ recent logs that belongs to the Persistent storage with the keyword $s$. The current approach would require a lot of mundane works including downloading the logs onto a machine that has Perl or other languages handy for text processing.
+At the moment, the system only prints the log onto standard output. Fortunately, though, the standard output and standard error are captured by the Amazon services. This approach is fine for the very basic uses. However, problems appear when we try to filter/categorise the logs. For example, we might want to find the $k$ recent logs that belongs to the Persistent storage with the keyword $s$. The current approach would require a lot of mundane works including downloading the logs onto a machine that has Perl or other languages handy for text processing.
 
-The metrics are not being collected at this point due to the extent of the project and the short amount of time we are given. However this would be a lovely feature to have for performance analysis reasons - we would like to know how fast the algorithm runs for different types of images and what would possible be the causes that slow the process down and etc. If, in the near future that the algorithm is improved, we would also like to know how much faster is it, and maybe also conduct a memory usage comparison against the previous algorithm. 
+The metrics are not being collected at this point due to the extent of the project and the short amount of time we are given. However, this would be a lovely feature to have for performance analysis reasons. For instance, we would like to know how fast the algorithm runs for different types of images and what would possible be the causes that slow the process down. Also, if the algorithm is modified, we would like to know how these modifications affected performance as well as memory usage in comparison to its previous version.
 
-The logging system should be fully equipped to do the basic and advanced data filtering and aggregation, preferable with charts and PDF reports. From the past working experiences we understand that there are already widely used and industrially accepted practices which we could easily start to deploy and use. 
+The logging system should be fully equipped to do the basic and advanced data filtering and aggregation, preferably with charts and PDF reports. From past working experiences, we understand that there are already widely used and industrially accepted practices which we could easily deploy and use.
 
 \subsection{Stereo Muzzle Reconstruction}
 
-Our project uses the standard 2 dimensional image matching technique. This is an acceptable practice. However, there are issues related to that:
+Our project uses the standard 2\-dimensional image matching technique. This is an acceptable practice. However, there are issues related to that:
 
 \begin{itemize}
-	\item muzzles are not on a flat surface; in fact, like the earth, it is on rather bumpy and uneven surface. From a geometric point of view, any images we have taken are just a projection of that 3D surface onto a 2D plane, meaning that there will always be skewing to the original object given different angle or camera parameters. This would eventually introduce errors to the matching process.
-	\item we have only taken one projected plane into consideration. To increase the accuracy it might be of the best to not ignore any data useful for matching.
+	\item Muzzles are not on a flat surface; in fact, like the earth, it is on rather bumpy and uneven surface. From a geometric point of view, any images we have taken are just a projection of that 3D surface onto a 2D plane, meaning that there will always be skewing to the original object given different angle or camera parameters. This would eventually introduce errors to the matching process.
+	\item We have only taken one projected plane into consideration. To increase the accuracy, it might be of the best to not ignore any data useful for matching.
 \end{itemize}
 
-The mentioned issues can easily be resolved if we try and match based on 3D objects. Theoretically, with the right equipments, we would be able to reconstruct the muzzle. Widely used approaches include computational stereo and photometric stereo: the former reconstructs the desired object mathematically~\cite{computational_stereo} whereas the latter does it from illumination\footnote{However this is proven to be more difficult to use as 1) the technique would typically require the surface to be mostly Lambertian however the muzzles are mostly specular and 2) there are also strict requirements for the environmental lighting and camera and object angles across the views.}~\cite{photometric_stereo}.
+The mentioned issues can easily be resolved if we try and match based on 3D objects. Theoretically, with the right equipment, we would be able to reconstruct the muzzle. Widely used approaches include computational stereo and photometric stereo: the former reconstructs the desired object mathematically~\cite{computational_stereo} whereas the latter does it from illumination\footnote{However this is proven to be more difficult to use as 1) the technique would typically require the surface to be mostly Lambertian however the muzzles are mostly specular and 2) there are also strict requirements for the environmental lighting and camera and object angles across the views.}~\cite{photometric_stereo}.
 
 The actual matching process, surprisingly, does not require a lot of tweaking to work. The key points are mathematically assumed to be $n$ dimensional, and so is the descriptor matcher (as the descriptor is essentially a $n$ dimensional matrix).
