@@ -33,7 +33,7 @@ where the order of items with the same number are inter-exchangeable.
 Different components behave in different manners, in terms of its lifecycle:
 
 \begin{itemize}
-	\item The API resides inside Docker running on EC2. The actual deployment, scaling and provisioning are done through AWS Elastic Beanstalk~\cite{beanstalk}. We have also assumed that unless under special cases such as necessary offline maintenance or system upgradeing, the service will not be offline. AWS Beanstalk will automatically re-boot the API if, under exceptional circumstances, the API goes down.
+	\item The API resides inside Docker running on EC2. The actual deployment, scaling and provisioning are done through AWS Elastic Beanstalk~\cite{beanstalk}. We have also assumed that unless under special cases such as necessary offline maintenance or system upgrading, the service will not be offline. AWS Beanstalk will automatically re-boot the API if, under exceptional circumstances, the API goes down.
 	\item The nature of persistence of the API naturally requires the persistence of the Persistent Storage Unit and Key Value Storage. Fortunately, due to the use of AWS RDS, S3 and ElastiCache there is no need for manual management of the components lifecycle.
 	\item Lambda is a special type of unit. Lambda instances are only fired up whenever there is a cattle registration or match request coming in, and will be instantly destroyed/disregarded when the computation is done to save the resources. Lambda instances then have a very short lifecycle, and are fairly lightweight to bootstrap\footnote{In fact the bootstrap of each Lambda instance only requires the the connection to the Key Value Store. This process takes little to no time as they both are close both geographically and in the network.}.
 \end{itemize}
@@ -52,3 +52,51 @@ Unfortunately, under certain cases, the services might have to be shut down. The
 Unlike the name suggests, ElastiCache is not employed as a cache engine from a programming point of view, because we have assumed that the saved key-value pairs will always be available unless otherwise indicated. In our design the system uses Redis, the Key-Value storage to store the descriptors to reduce the running time of the matching process - a suggestion of, from a philosophical point of view, a caching process.
 
 From the previous subsection it is pointed out that the data in the key-value store is being kept. This is not the ideal use case of any cache engine; however, in the future iterations, it has been agreed on that the system will handle the cache miss should it ever happen as a way to make the system more robust.
+
+\subsection{Use of S3}
+
+Our system has been using S3 extensively. There are two main uses for S3:
+
+\begin{itemize}
+	\item Image storage: images of cattle are saved onto S3. The index include the cattle ID and the image ID. User ID does not constitute part of the key as a cattle does not belong to one and only one owner.
+	\item Action trigger. Object creation/update and deletion on S3 turns out to be able to send a notification message to the other Amazon cloud services.
+\end{itemize}
+
+One reason that S3 has been used as a simple action trigger service is that as it turns out, S3 has a much more robust connection with the rest of the Amazon Cloud services. The original implementation of the Job Assignment Lambda invokes the Matching Lambda with the official AWS SDK \texttt{boto3}, however that seemed to be unusable. The Job Assignment Lambda has a running time limit of 10 seconds, however the invocation process using \texttt{boto3} alone frequently bring the whole process to timeout\footnote{Our speculation is that it might be the \texttt{Payload} data that we are sending is over 500KB - a scenario that \texttt{boto3} is not optimised for.}. After some testing and digging around, we found out that if we save the parameter (the descriptor for the image to be matched against) onto S3 as an object, and if that triggers the invocation of the Matching Lambda, the problem would be resolved and it is lightning fast and there never had been any connection issues. We have decided to keep using S3 since after some debate for the non-ideal use of the service.
+
+\subsection{Algorithm Performance}
+\label{sec:algorithm}
+
+It has been briefly discussed about the algorithm performance and the discussion will resume at this section. Note that the following tests are concluded on a machine with the 
+
+\begin{itemize}
+	\item Processor: Intel Core i7-6820HQ, 2.7 GHz, 4 cores, 8 processes
+	\item Memory: 16 GB 2133 MHz LPDDR3
+	\item Operating System: macOS 10.12.2 (build 16C67)
+\end{itemize}
+
+and GPU acceleration turned off.
+
+A simple test (with a sample size of 144 pairwise image matches) yields the following result, note that the cropping and descriptor generation are for two images (unit: ms):
+
+\begin{center}
+\begin{tabular}{c|c c c}
+        & Image Cropping & Descriptor Generation & Matching \\
+\hline
+Mean    & $135.20$       & $482.91$              & $47.15$  \\
+Medium  & $136.68$       & $450.11$              & $42.77$  \\
+SD      & $11.87$        & $91.72$               & $28.79$
+\end{tabular}
+\end{center}
+
+Note that image cropping and descriptor generation are only done once for each request. The total time then is bound by the formula $N * t_m + t_d$ where $N$ is a fixed number, ignoring the time for IO actions. The running time is not upper bounded by the data size even though the matching process is essentially pairwise as an important assumption we have made is that we always have as many Lambda instances at our disposal as we want by our design.
+
+An box-plot visualisation of the data is shown in the combined plot ~\ref{fig:algo_visual_all}.
+
+\begin{figure}
+  \includegraphics[width=\textwidth]{sketch/all.pdf}
+  \caption{The combined algorithm runtime plot}
+  \label{fig:algo_visual_all}
+\end{figure}
+
+The visualisation clearly suggests that the runtime of the algorithm is rather stable all but for the descriptor generation process. This proves that the runtime will be acceptable in our case for a pairwise matching.
