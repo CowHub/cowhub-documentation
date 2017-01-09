@@ -1,4 +1,4 @@
-Rather than be built as a monolithic block, CowHub has a number of small, modular components that serve different purposes and form a complete system; CowHub is a system of loosely-connected micro-services. Each and every component is deployable separately, having been built and tested independently and corresponds to a source repository on GitHub. Each component can be dependent on other services in the system, but these are mocked during the testing stage and implemented fully in production. For an overview of all important components, see Figure \ref{fig:structure}.
+Rather than be built as a monolithic block, CowHub has a number of small, modular components each serving different purposes. It is a platform of loosely-connected micro-services which when put together form a complete system. All the components have their own source repository on GitHub. This allows us to build, test and deploy them independently. Each component can be dependent on other services in the system, but these are mocked during the testing stage and implemented fully in production. For an overview of all important components, see Figure \ref{fig:structure}.
 
 \begin{sidewaysfigure}
   \includegraphics[width=\textwidth]{sketch/structure.pdf}
@@ -20,11 +20,11 @@ S3 is used to hold all file and blob data. It has been chosen because of its per
 The database is to store the following:
 
 \begin{enumerate}
-	\item The information about farm and farmers. 
+	\item The information about farm and farmers.
 	\item The information about registered cattle, including the herd number, (optionally) the name, the owner, the birthdate, and most importantly the sample image(s) of its muzzle for identification uses.
 	\item The login details of registered farmers. Farmers will need to log in to be able to input and review the cattle data.
 	\item The match results. Every match job will be assigned a job ID and the result will be stored into the database. These match results will be useful in the future as statistics.
-	\item Other data for the system to run smoothly (including session tokens etc.). 
+	\item Other data for the system to run smoothly (including session tokens etc.).
 	% TODO: more stuff about databases
 \end{enumerate}
 
@@ -44,7 +44,7 @@ The REST API mainly handles the following:
 
 \begin{enumerate}
 	\item Account management. A user (farmer) needs to be able to manage his/her personal data, change passwords and etc.
-	\item Cattle management. A user (farmer) needs to be able to create/edit/delete information about a cattle and upload/update/delete images for a cattle. 
+	\item Cattle management. A user (farmer) needs to be able to create/edit/delete information about a cattle and upload/update/delete images for a cattle.
 	\item Session management. The API handles sessions through tokens in a unified manner for all front-ends that require user login as REST API is stateless.
 	% TODO: more stuff about our API
 \end{enumerate}
@@ -67,7 +67,7 @@ The Job manager is the more interesting part. There are two different types of j
 Based on our statistics, step (a) normally takes a half to one second, and every pairwise match in step (c) takes about 5 to 25 milliseconds\footnote{This is due to the resizing and normalisation done prior to the match.}. That is, ignoring the network and IO delays, a match will take about $T = N * t_m / 1000 + t_d / 1000$ seconds to complete, where $t_m \in [5, 40]$ (including the time for de/serialisation) and $t_d \in [500, 1000]$. In this reasoning our computation time can be thought of as upper bounded by $Nc$, where $c$ is a constant, which is totally size-agnostic, because it is based on the assumption that we would always have $\lceil M / N \rceil$ computational units at our disposal. This rational implies that, in theory, the computation time does not generally grow with respect to the number of images in our database\footnote{In practice it does - because we cannot ignore the time consumed for IO actions.}.
 
 \subsection{Key Value Store}
-A cluster of Redis servers is employed through Amazon ElastiCache service. 
+A cluster of Redis servers is employed through Amazon ElastiCache service.
 
 For performance reasons it has been decided that we use a key value store for concurrent and lively access for the descriptor of an image. This store is to be accessed very frequently and as only a small piece of data is being extracted at once it seemed inappropriate to be using a database. Another reason that a key value store is used, as opposed to accessing the descriptor directly from the database unit is data separation - the only place that this data is being accessed is the headless computational unit and nothing more. Also, as suggested before, the database unit is only accessible through the API, and any access directly from other components would break the promise; alternatively, to access the descriptors through the API would introduce significant (and unnecessary) burden to the API itself and result in great performance problems.
 
@@ -87,80 +87,73 @@ The process of matching is similar to that of MapReduce, and so is the implement
 
 \subsection{Mobile and Web Front-ends}
 
-Our plan when designing the front-end was to support a number of platforms, ideally sharing the same codebase while still providing a native experience to the user. The requirement is to provide a mobile frontend allowing a user to photograph, geolocate and identify cattle, and an administrative web interface to manage user accounts and input further cattle information. 
+The APIs of our service was designed as globally accessible i.e. all front-ends communicate with the same interface. This means that users can develop their own application if the front-end that we provide are not to their liking. Nonetheless, our initial plan when designing the front-ends was to provide the same application with a support on different platforms (namely web, android and  iOS). Both the mobile and web frontends access the API to provide a service to a farmer. Ideally, we want reuse a common codebase while still providing to the user a stateless front-end with a native experience. Therefore, in order to to share as much code as possible, we use web technologies to implement the mobile interface.
 
-The front-ends we implement are all stateless, meaning that they will run independently. Another important implication of our system design where the front-ends all communicate through the same globally accessible APIs is that users can develop their own front-ends easily, should they feel that the provided front-ends are not for their taste.
+However, unifying the web and mobile user journeys proved to be overly complicated. The view rendering code for the mobile interface fundementally greatly differs from the web interface. Users on mobile platforms expect content to be spread over a number of concise pages, with clean and smooth page transitions and navigation. On the other hand, desktop web interfaces, tend to have more screen real estate available so more content is displayed with fewer page clicks. This lead us to redefine the purpose of each application as follows: The mobile interface would allow a user to register, manage, identify and geolocate cattle whereas the web interface would only allow account management and provide a herd catalogue.
 
 \subsubsection{Web Frontend}
-The Web front-end is implemented using React.js and Redux, which are JavaScript libraries used to build user interfaces. These libraries allow us, during development, to modify the WebView style and content and view the changes without the need to re-render a page. This allows to perform a number of action:
+The web front-end is implemented using React.js and Redux, which are JavaScript libraries used to build user interfaces. These libraries allow us, during development, to modify the WebView style and content and view the changes without the need to re-render a page. This allows to perform a number of action:
 
 \begin{itemize}
-	\item modify the state of the application to display a particular components (registration form, deleting form, etc...)
-	\item display modified information or a different style without the need to re-render the whole page
-	\item the possibility to navigate between different pages and storing the information, so that there is no need to make a server call every time we open a specific page
+	\item Modify the state of the application to display a particular components (registration form, deleting form, etc...)
+	\item Display modified information without the need to re-render the whole page
+	\item Navigate between different pages while retaining information thus minimizing the number of redundant server calls
 \end{itemize}
 
-Even if seeing the newly modified display without having to re-render a page is a nice features to have when developing a web interface rapidly it has also it's cons, such as:
+Hot reloading is a nice feature, but it comes at a price:
 \begin{itemize}
-	\item writing React components is less straight forward than writing pure HTML code for coding a web gpage
+	\item Writing React components is less straight forward than writing pure HTML code for coding a web gpage
 	\item React does not offer any router nor model management libraries which makes routing between different pages more complex
-\end{itemize} 
+\end{itemize}
+
+As mentioned above, the web front-end was meant originally meant to be a complete interface which utilizes all the functionalities offered by our solution. However, we noticed that the of platform started to deiverge from the user journey. Consiquently we decided to simplify the features accessible from the web making it more intuitive to use.
 
 \subsubsection{Mobile Frontends}
 
-Both the mobile and web frontends access the same API provided by the backend and have many common actions, so in order to share and reuse as much code as possible we implement the mobile interface using the same web technologies as the web frontend, using React and Redux running inside a WebView which is wrapped into a standalone application by Apache's Cordova framework. This is known as a "hybrid" structure, since the same application will run unmodified in a browser as well as standalone applications on mobile devices. This approach presents us with a number of advantages:
-
+\textbf{I. Early Stages}
+The first prototype was written as a simple web application using html and JavaScript, with Android style components provided by a styling framework called Framework7. The simple code style of this application allowed us to produce a fully working prototype in just over a week. However, this branch would prove to be a dead end for the following reasons:
 \begin{itemize}
-	\item all of the high-level application logic is written in JavaScript, giving the same behaviour cross-platform, meaning that we can start the development without any prior platform-specific knowledge;
-	\item agile development of the application is allowed with extremely quick prototyping and deployment  - the application can be tested and modified in a browser on a desktop, rather than having to compile and run a native application in an emulator or on a physical device;
-	\item most of the Node.js libraries are made available for use: React.js and Redux as used in the web frontend for example, as well as HTML5 libraries for geolocation and ondevice image manipulation;
-	\item allows us to support a large number of platforms quickly, since Cordova is available on almost all modern mobile operating systems;
+  \item All the logic was contained within a single js file, combined with jQuery calls which were updating the view. This made maintening, testing and expanding the application inefficient.
+  \item Using different frameworks to our web front-end meant that we were having to implement common features twice.
+  \item Framework7 proved to be lacking in respect to supporting multiple platforms at once.
 \end{itemize}
 
-Downsides include:
+\textbf{II. Current Build}
+The mobile front-end is implemented as a "hybrid" application. React and Redux run inside a WebView which is wrapped into a standalone application by Apache's Cordova framework. As such, it runs unmodified in a browser and in a standalone applications on mobile devices. This approach presents us with a number of advantages:
 
 \begin{itemize}
-	\item poor performance from extensive use of Webview. Web components will render much more slowly than using OS provided native components. The lack of OS optimisation results in increased battery consumption;
-	\item access to low-level and platform dependant features are limited and involve extensive use of plugins to Cordova, these cannot be tested in the browser, are often poorly documented and can be tricky to manage, as opposed to OS provided APIs which can often be easily dropped in. HTML5 features are dependant on the system browser providing the Webview. Android suffers from a large amount of fragmentation, with many devices shipping different Android versions and browsers. This means it is difficult to guarantee that the application will work on a certain device, whereas with a native application the systems package installer will be able to determine if a device is compatible. HTML5 features are also not available while the application is running in the background, since the Webview is paused. This can affect access to features such as geolocation;
-	\item difficulty in maintaining clean, reusable, easily testable code. Web applications tend to often mix core logic with the view, making it difficult to reuse in other parts of the application and to isolate components to test;
-	\item it can be difficult to provide a "native" experience, since system provided components need to be recreated with web elements;
+	\item All of the high-level application logic is written in JavaScript, giving the same behaviour cross-platform. This means that we can start the development without any prior platform-specific knowledge;
+	\item Agile development of the application is possible with extremely quick prototyping and deployment. The application can be tested and modified in a browser on a desktop, rather than having to compile and run a native application in an emulator or on a physical device;
+	\item Most of the Node.js libraries are made available for use: React.js and Redux as used in the web frontend for example, as well as HTML5 libraries for geolocation and ondevice image manipulation;
+	\item Allows us to support a large number of platforms quickly, since Cordova is available on almost all modern mobile operating systems;
 \end{itemize}
 
+However, this approach also implies a few downsides:
 
+\begin{itemize}
+	\item Poor performance from extensive use of Webview. Web components will render much more slowly than using OS provided native components. The lack of OS optimisation results in increased battery consumption;
+	\item Access to low-level and platform dependant features are limited and involve extensive use of plugins to Cordova. They cannot be tested in the browser, are often poorly documented and can be tricky to manage, as opposed to OS provided APIs which can often be easily dropped in;
+  \item HTML5 features are dependant on the system browser providing the Webview. Android suffers from a large amount of fragmentation, with many devices shipping different Android versions and browsers. This means it is difficult to guarantee that the application will work on a certain device. On the other hand, the systems package installer will be able to determine if a native application is device compatible;
+  \item HTML5 features are not available while the application is running in the background, since the Webview is paused. For instance, this can affect access to features such as geolocation;
+	\item Difficulty in maintaining clean, reusable, easily testable code. Web applications tend to often mix core logic with the view, making it difficult to reuse in other parts of the application and to isolate components to test;
+	\item Difficulty to provide a "native" experience, since system provided components need to be recreated with web elements;
+\end{itemize}
 
-We quickly realised that the view rendering code for the mobile interface would have to differ from the web interface. Users on mobile platforms expect content to be spread over a number of concise pages, with clean and smooth page transitions and navigation, as opposed to desktop web interfaces, which tend to have more screen real estate available so more content is displayed with fewer page clicks preferred. React-router, which we use for navigation on the web front-end, does not provide page transitions out of the box.
+Moreover, one of the largest challenges we faced was implementing the camera view. In order to improve the quality of the images taken, we wanted to provide a muzzle overlay. Adding this feature in a native application is quite trivial. However, while Cordova ships with a camera plugin, it simply calls the system camera. This made adding an overlay impossible. One aproach to solving this issue would have been to import a custom camera application. But, this would mean writing a custom camera ourselves for each platform we wish to support.
+Ultimately we solved this issue by using an opensource\footnote{The author has added a morality clause to a standard MIT license, restricting use in applications which are considered illegal} augmented reality plugin called ezAR. With this package, we are able to produce a custom camera view using react components, and use a modified Onsen to create transparent pages so the camera view can be seen. The snapshot plugin was originally designed to allow you to take screenshots of an application by grabbing an image from the camera and rendering the Webview on top of the image. By using a special debugging flag the plugin will return only the camera image. This means we can re-purpose the plugin as full custom camera. In the future native camera plugins can simply be slotted in in it's place.
 
-\subsubsection{Initial mobile application prototype}
+In general despite expected difficulties with access to low level features and the other challenges we have faced, the hybrid application approach has allowed us to implement a well structured easily extensible front-end withing the tight time constraints of this project.
 
-Initially we prototyped an application to be able to demonstrate the basic functionality of our API. A simple web application was written using html and JavaScript, with Android style components provided by a styling framework called Framework7. The simple code style of this application allowed us to produce a fully working prototype in just over a week. However for a number of reasons this branch would prove to be a dead end. 
-
-Firstly all the logic was contained within a single js file, combined with jQuery calls which were updating the view. Even this simple application was proving difficult to maintain and to add additional features. This would have also reduced it's future testability. 
-
-Secondly this version used different frameworks to our web front-end, which was already being developed using React and Redux. This meant that we were having to implement common features twice, whereas we wanted to be able to share code between the two front-end efforts.
-
-Finally Framework7 proved to be lacking in respect to supporting multiple platforms at once. We wanted to support both Android and iOS with the same code base, which would have meant developing a whole new application.
-
-This prototype became the predecessor to our current front-ends.
-
-\subsubsection{Current mobile applications}
-
-
-Our mobile front-ends attempt to simulate a "native" interface using the Onsen UI framework. Onsen provides a navigator class that renders pages and provides navigation between them, but most crucially also provides react components which are styled as native components. Onsen contains components styled for both Android and iOS, and after detecting what OS the Webview is running in, applies the appropriate style. When a future release of Onsen supporting Windows Phone is released, a third port of the mobile frontend will be trivial to implement.
-
-
-The Onsen navigator component does not currently support controlling navigation through Redux, so our frontends provide a wrapper for the navigator, allowing us to achieve reliable navigation dispatched through redux actions. 
-
-Our front-ends are written in ES6 JavaScript, allowing clearer code style, proper classes and native modules. This makes it easy to define modules which can be easily tested and reused. We use the babel transpiler and Webpack to produce ES5 code that will run in current phone browsers since ES6 support is limited. 
- 
-One of the largest challenges was implementing the camera view. While Cordova ships with a camera plugin, it simply calls the system camera, meaning that you are not able to overlay custom text and graphics such as a muzzle overlay for lining up an image of cattle correctly. If we had written a native application for Android, the functionality could have been easily achieved by building a custom camera component. Cordova also allows custom OS plugins to be added, so with some difficulty we could have imported a custom camera application. However this approach would mean writing a custom camera ourselves for each platform we wish to support. This would have been time-consuming to implement and maintain given the time-constraints of the project. Ultimately we solved this issue by using an opensource\footnote{The author has added a morality clause to a standard MIT license, restricting use in applications which are considered illegal}  augmented reality plugin called ezAR. 
-
-EzAR is a collection of packages amongst which there is a video overlay and a snapshot plugin. The video overlay activates the camera and displays the live camera feed behind the Webview. We are able to produce a custom camera view using react components, and use a modified Onsen to create transparent pages so the camera view can be seen. The snapshot plugin was originally designed to allow you to take screenshots of an application by grabbing an image from the camera and rendering the Webview on top of the image. By using a special debugging flag the plugin will return only the camera image. This means we can re-purpose the plugin as full custom camera. In the future native camera plugins can simply be slotted in in it's place.
-
-By using Redux we are able to separate the core application logic from the view, opening up the ability to share logic with the web front-end and since the reducers are all pure functions this logic is easy to test.
-
-
-In general despite expected difficulties with access to low level features, the hybrid application approach has allowed us to implement a well structured easily extensible front-end withing the tight time constraints of this project.
-
+\textbf{III. Technology Breakdown}
+\begin{itemize}
+  \item \textbf{HTML:} HTML5 provides us with the building blocks of powerful  applications. For instance, the croping functionality was implemented using HTML5 canvas.
+  \item \textbf{ES6 JavaScript:} ES6 JavaScript provides a clearer code style, as well as proper classes and native modules. It also simplifies the definition of modules which can then be easily tested and reused.
+  \item \textbf{Webpack with Babel:} Webpack with Babel transpiles our application into ES5 code since ES6 support is limited.
+  \item \textbf{Redux:} Redux enables us to separate the core application logic from the view. This allows us to share the logic with the web front-end and since the reducers are all pure functions this logic is easy to test.
+  \item \textbf{Onsen UI:} The Onsen UI framework simulates a "native" interface by styling React components as native components for both Android and iOS. It is able to do so by detecting the OS the webview is running in before applying the style. Note that Windows phone support is unreleased yet but would be trivial to add.
+  \item \textbf{Onsen Navigator:} Onsen provides a navigator class that renders pages and provides navigation between them. Note, the navigator are wrapped in order to dispatch navigation through Redux actions; Onsen does not currently support Redux.
+  \item \textbf{ezAR:} ezAR is a collection of packages amongst which there is a video overlay and a snapshot plugin. The video overlay activates the camera and displays the live camera feed behind the Webview.
+\end{itemize}
 
 \subsection{Implementation Difficulties And Comments}
 
@@ -182,6 +175,6 @@ The only way that's left then is to manually compile the C++ code into an object
 
 % TODO: Infrastructure financial constraints
 
-\subsubsection{Keeping The API Gateway Performant} 
+\subsubsection{Keeping The API Gateway Performant}
 
 % TODO: Keeping the API Gateway Performant
