@@ -116,10 +116,28 @@ Downsides include:
 \begin{itemize}
 	\item poor performance from extensive use of Webview. Web components will render much more slowly than using OS provided native components. The lack of OS optimisation results in increased battery consumption;
 	\item access to low-level and platform dependant features are limited and involve extensive use of plugins to Cordova, these cannot be tested in the browser, are often poorly documented and can be tricky to manage, as opposed to OS provided APIs which can often be easily dropped in. HTML5 features are dependant on the system browser providing the Webview. Android suffers from a large amount of fragmentation, with many devices shipping different Android versions and browsers. This means it is difficult to guarantee that the application will work on a certain device, whereas with a native application the systems package installer will be able to determine if a device is compatible. HTML5 features are also not available while the application is running in the background, since the Webview is paused. This can affect access to features such as geolocation;
+	\item difficulty in maintaining clean, reusable, easily testable code. Web applications tend to often mix core logic with the view, making it difficult to reuse in other parts of the application and to isolate components to test;
 	\item it can be difficult to provide a "native" experience, since system provided components need to be recreated with web elements;
 \end{itemize}
 
+
+
 We quickly realised that the view rendering code for the mobile interface would have to differ from the web interface. Users on mobile platforms expect content to be spread over a number of concise pages, with clean and smooth page transitions and navigation, as opposed to desktop web interfaces, which tend to have more screen real estate available so more content is displayed with fewer page clicks preferred. React-router, which we use for navigation on the web front-end, does not provide page transitions out of the box.
+
+\subsubsection{Initial mobile application prototype}
+
+Initially we prototyped an application to be able to demonstrate the basic functionality of our API. A simple web application was written using html and JavaScript, with Android style components provided by a styling framework called Framework7. The simple code style of this application allowed us to produce a fully working prototype in just over a week. However for a number of reasons this branch would prove to be a dead end. 
+
+Firstly all the logic was contained within a single js file, combined with jQuery calls which were updating the view. Even this simple application was proving difficult to maintain and to add additional features. This would have also reduced it's future testability. 
+
+Secondly this version used different frameworks to our web front-end, which was already being developed using React and Redux. This meant that we were having to implement common features twice, whereas we wanted to be able to share code between the two front-end efforts.
+
+Finally Framework7 proved to be lacking in respect to supporting multiple platforms at once. We wanted to support both Android and iOS with the same code base, which would have meant developing a whole new application.
+
+This prototype became the predecessor to our current front-ends.
+
+\subsubsection{Current mobile applications}
+
 
 Our mobile front-ends attempt to simulate a "native" interface using the Onsen UI framework. Onsen provides a navigator class that renders pages and provides navigation between them, but most crucially also provides react components which are styled as native components. Onsen contains components styled for both Android and iOS, and after detecting what OS the Webview is running in, applies the appropriate style. When a future release of Onsen supporting Windows Phone is released, a third port of the mobile frontend will be trivial to implement.
 
@@ -128,8 +146,11 @@ The Onsen navigator component does not currently support controlling navigation 
  
 One of the largest challenges was implementing the camera view. While Cordova ships with a camera plugin, it simply calls the system camera, meaning that you are not able to overlay custom text and graphics such as a muzzle overlay for lining up an image of cattle correctly. If we had written a native application for Android, the functionality could have been easily achieved by building a custom camera component. Cordova also allows custom OS plugins to be added, so with some difficulty we could have imported a custom camera application. However this approach would mean writing a custom camera ourselves for each platform we wish to support. This would have been time-consuming to implement and maintain given the time-constraints of the project. Ultimately we solved this issue by using an opensource\footnote{The author has added a morality clause to a standard MIT license, restricting use in applications which are considered illegal}  augmented reality plugin called ezAR. 
 
-EzAR is a collection of packages amongst which there is a video overlay and a snapshot plugin. The video overlay activates the camera and displays the live camera feed behind the Webview. We are able to produce a custom camera view using react components, and use a modified Onsen to create transparent pages so the camera view can be seen. The snapshot plugin was originally designed to allow you to take screenshots of an application by grabbing an image from the camera and rendering the Webview on top of the image. By using a special debugging flag the plugin will return only the camera image. This means we can re-purpose the plugin as full custom camera. In the future native camera plugins can simply be slotted in in its place.
+EzAR is a collection of packages amongst which there is a video overlay and a snapshot plugin. The video overlay activates the camera and displays the live camera feed behind the Webview. We are able to produce a custom camera view using react components, and use a modified Onsen to create transparent pages so the camera view can be seen. The snapshot plugin was originally designed to allow you to take screenshots of an application by grabbing an image from the camera and rendering the Webview on top of the image. By using a special debugging flag the plugin will return only the camera image. This means we can re-purpose the plugin as full custom camera. In the future native camera plugins can simply be slotted in in it's place.
 
+By using Redux we are able to separate the core application logic from the view, opening up the ability to share logic with the web front-end and since the reducers are all pure functions this logic is easy to test.
+
+In general despite expected difficulties with access to low level features, the hybrid application approach has allowed us to implement a well structured easily extensible front-end withing the tight time constraints of this project.
 
 
 \subsection{Implementation Difficulties And Comments}
