@@ -1,4 +1,4 @@
-all: clean open
+all: clean report
 
 report: report.tex
 	pdflatex -file-line-error -interaction=nonstopmode -synctex=1 $^

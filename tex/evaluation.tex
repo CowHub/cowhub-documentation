@@ -3,7 +3,7 @@
 
 The different components of the system runs independently from each other. However, still, connection needs to be established to form the whole system. The said connections are not created eagerly, though, as to avoid the looping issues with (possible) cyclic dependency and to reduce the bootstrap time.
 
-For the front-ends, as they are only created when needed, they do not to fit in the bootstrap stage. They will be able to work fine as long as the system is online at the time of use. 
+For the front-ends, as they are only created when needed, they do not to fit in the bootstrap stage. They will be able to work fine as long as the system is online at the time of use.
 
 The structure of the system suggests the explicit dependencies of the system:
 
@@ -67,7 +67,7 @@ One reason that S3 has been used as a simple action trigger service is that as i
 \subsection{Algorithm Performance}
 \label{sec:algorithm}
 
-It has been briefly discussed about the algorithm performance and the discussion will resume at this section. Note that the following tests are concluded on a machine with the 
+It has been briefly discussed about the algorithm performance and the discussion will resume at this section. Note that the following tests are concluded on a machine with the
 
 \begin{itemize}
 	\item Processor: Intel Core i7-6820HQ, 2.7 GHz, 4 cores, 8 processes
@@ -122,7 +122,7 @@ By using AWS IAMs, we were able to further isolate the abilities of individual a
 
 One of the key problem sources during our project was infrastructure. The infrastructure was the only part of the project which would have a cost directly attached to it. We were given available hardware through the university's hardware program exposing a choice of machines running through Apache CloudStack. We started our project with these machines, finding deployment to be very time consuming and unreliable. Furthermore, owing to the modern technologies we deployed, some software, such as GitLab CI, seemed unoptimised and ran incredibly slowly, further delaying deployment and iterations.
 
-Therefore, as the project progressed, we researched using professional cloud service providers which offered completely custom software, some of which would largely handle deployment in an automated fashion. We researched using both Microsoft Azure and Amazon Web Services (AWS) \footnote{Credits were available for both platforms through a university affiliation program.}, eventually choosing AWS for it's superior software package and unrivalled functionality in AWS lambda. 
+Therefore, as the project progressed, we researched using professional cloud service providers which offered completely custom software, some of which would largely handle deployment in an automated fashion. We researched using both Microsoft Azure and Amazon Web Services (AWS) \footnote{Credits were available for both platforms through a university affiliation program.}, eventually choosing AWS for it's superior software package and unrivalled functionality in AWS lambda.
 
 Using AWS lambda, a pure functional environment designed to be deployed as a software package and be triggered and executed in parallel across hundreds of machines gave us performance that we couldn't hope to emulate without many more hours of development, deployment, and financial burden. With low cost pricing and a generous free allowance \footnote{AWS provides 3,200,000 GB/seconds for free per month as part of it's free tier at the time of writing}, we were able to develop an instantly scalable, efficient system to provide the backbone of our image processing and identification.
 
@@ -130,5 +130,18 @@ The experience of using multiple providers in this scenario brought a clear conc
 
 Before transitioning to using AWS, backed by GitHub and CircleCI for version control and continuous integration respectively, the proportion of our time we spent on deployment and systems issues was vastly higher than we would have liked. After moving to AWS, this time became nominal as we were able to rely on a dependable platform for service delivery.
 
-In conclusion, should we have remained with the provided commodity hardware using a basic software layer, we wouldn't have had a financial burden but we wouldn't have achieved the success that we have with the project either. 
+In conclusion, should we have remained with the provided commodity hardware using a basic software layer, we wouldn't have had a financial burden but we wouldn't have achieved the success that we have with the project either.
 
+\subsection{Field Research}
+
+\subsubsection{Testing of the system}
+
+% TODO: Evaluation of testing
+
+\subsubsection{States' Vetinarary Officer: Dr. Theo Knight-Jones}
+
+% TODO: Evaluation of meeting with Dr. Knight-Jones
+
+\subsubsection{Jersey Overseas Aid: Simon Boas}
+
+% TODO: Evaluation of meeting with Simon Boas
