@@ -50,5 +50,7 @@ Cowhub is built using state of the art image recognition and cloud computing tec
 %------------------------------------------------------------------------------
 
 \begin{subsection}{User Feedback}
-  Most importantly we want to have feedback from actual farmers who will potentially use our tool. Therefore we traveled to Jersey and tested the platform on the field. We also used this opportunity to interview cattle cartakers and breeders to gain some insight that might lead to further improve the performance of our recognition algorithm. Here is an extract:
+  Most importantly we wanted to have feedback from actual farmers who will potentially use our tool. Therefore we traveled to Jersey and tested the platform on the field. This helped us discovered a few flaws in our application. For instance, when attempting to take a picture of its muzzle, a cow becomes curious and licks the phone. In order to oversome this issue, we decided to implement a zooming feature that enables a user to take the muzzle-shot from a ``safe'' distance. We also realized that sending images requires a robust and stable internet connexion. Hence, we added offline features which preserves a user's herd information locally as to reduce the amount of data it fetches. We might implement later some additional optimizations such as image modification (resizing and displacement) and local request queue.
+  
+  We also used this opportunity to interview cattle cartakers and breeders to gain some insight about the industry. This actually lead us to think about many things including the potential of this project and its prospects. More on this in the field research section.
 \end{subsection}
