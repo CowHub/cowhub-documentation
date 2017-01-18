@@ -1,4 +1,5 @@
-all: clean report cleanish
+all: clean report 
+	make cleanish
 
 report: report.tex
 	pdflatex -file-line-error -interaction=nonstopmode -synctex=1 $^
