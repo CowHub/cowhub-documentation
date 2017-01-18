@@ -64,7 +64,7 @@ The Job manager is the more interesting part. There are two different types of j
 	\end{enumerate}
 \end{enumerate}
 
-Based on our statistics, step (a) normally takes a half to one second, and every pairwise match in step (c) takes about 30 to 80 milliseconds\footnote{This is due to the resizing and normalisation done prior to the match.}. That is, ignoring the network and IO delays, a match will take about $T = N * t_m / 1000 + t_d / 1000$ seconds to complete, where $t_m \in [30, 80]$ and $t_d \in [500, 1000]$. In this reasoning our computation time can be thought of as upper bounded by $Nc$, where $c \in \mathbb{Q}$, which is totally size-agnostic, because it is based on the assumption that we would always have $\lceil M / N \rceil$ computational units at our disposal. This rational implies that, in theory, the computation time does not generally grow with respect to the number of images in our database\footnote{In practice it does - because we cannot ignore the time consumed for IO actions.}. For more details, please see ~\ref{sec:algorithm}.
+Based on our statistics, step (a) normally takes a half to one second, and every pairwise match in step (c) takes about 30 to 80 milliseconds\footnote{This is due to the resizing and normalisation done prior to the match.}. That is, ignoring the network and IO delays, a match will take about $T = N \times \frac{t_m}{1000} + \frac{t_d}{1000}$ seconds to complete, where $t_m \in [30, 80]$ and $t_d \in [500, 1000]$. In this reasoning our computation time can be thought of as upper bounded by $Nc$, where $c \in \mathbb{Q}$, which is totally size-agnostic, because it is based on the assumption that we would always have $\lceil \frac{M}{N} \rceil$ computational units at our disposal. This rational implies that, in theory, the computation time does not generally grow with respect to the number of images in our database\footnote{In practice it does - because we cannot ignore the time consumed for IO actions.}. For more details, please see ~\ref{sec:algorithm}.
 
 \subsection{Key Value Store}
 A cluster of Redis servers is employed through Amazon ElastiCache service.
@@ -79,7 +79,7 @@ The three different kinds of the Lambda processes include:
 
 \begin{enumerate}
 	\item Registration Lambda. This is a one way communication. The caller (the API) calls the headless computational unit, causing a Registration Lambda to be spawned. This Lambda process will run to the end (the generation of the descriptor of an image) and then store it into the Key Value store.
-	\item Job Assignment Lambda. The API would have to submit the image to be matched and trigger the Job Assignment Lambda. This Lambda will slice the existing descriptors into $n=\lceil M / N \rceil$ chunks, and invoke $n$ Matching Lambdas asynchronously.
+	\item Job Assignment Lambda. The API would have to submit the image to be matched and trigger the Job Assignment Lambda. This Lambda will slice the existing descriptors into $n=\lceil \frac{M}{N} \rceil$ chunks, and invoke $n$ Matching Lambdas asynchronously.
 	\item Matching Lambda. The caller will need to call the headless computational unit with the job detail, and the Matching Lambda will run the match for $N$ images as discussed before. This process is completely concurrent. Upon completion of the process, the Lambda will write the best match within a batch of $N$ images back to the cache service if the match is better than the current one in the cache.
 \end{enumerate}
 
@@ -154,4 +154,3 @@ In general despite expected difficulties with access to low level features and t
   \item \textbf{Onsen Navigator:} Onsen provides a navigator class that renders pages and provides navigation between them. Note, the navigator are wrapped in order to dispatch navigation through Redux actions; Onsen does not currently support Redux.
   \item \textbf{ezAR:} ezAR is a collection of packages amongst which there is a video overlay and a snapshot plugin. The video overlay activates the camera and displays the live camera feed behind the Webview.
 \end{itemize}
-
