@@ -1,25 +1,25 @@
 
 \subsection{Bootstrap and Lifecycle}
 
-The different components of the system runs independently from each other. However, still, connection needs to be established to form the whole system. The said connections are not created eagerly, though, as to avoid the looping issues with (possible) cyclic dependency and to reduce the bootstrap time.
+The different components of the system run independently from each other. However, connections need to be established between these components to form the whole system. These connections are created during the deployment process with the system-as-a-whole designed to avoid (possible) cyclic dependencies.
 
-For the front-ends, as they are only created when needed, they do not to fit in the bootstrap stage. They will be able to work fine as long as the system is online at the time of use.
+The front-ends are created and deployed separately and accessed on-demand (statically) and as such they do not to fit into such a bootstrapping stage.
 
-The structure of the system suggests the explicit dependencies of the system:
+The structure of the system has the following explicit dependencies:
 
 \begin{itemize}
-	\item The API is dependent on the Persistent Storage as the API does not hold any data at the time of bootstrap.
-	\item The API and Lambda depend on the Key Value Store.
+	\item The API is dependent on the database layer (Postgres).
+	\item Lambda (compute) depends on the Key Value Store (Elasticache / Redis).
 \end{itemize}
 
 and the implicit ones:
 
 \begin{itemize}
-	\item S3 should be present whenever API and Lambda is available as it serves as a mean to invoke the Lambda instances for the API.
-	\item We have used the Redis (Key Value Store engine) Channel for Lambda state monitoring.
+	\item S3 is required by the API and Lambda, serving as blob storage and as a means to invoke the Lambda instances.
+	\item We have used the Redis (Key Value Store engine) channel for Lambda state monitoring.
 \end{itemize}
 
-Topologically a reasonable bootstrap order, then, would be\footnote{That is, we sort the items based on a order that takes the dependencies into consideration. For more information regarding topological sort please see https://en.wikipedia.org/wiki/Topological\_sorting.}.
+Fundamental components:
 
 \begin{enumerate}
 	\item[1] Persistent Storage Unit
